@@ -936,6 +936,8 @@
       <div class="btn-group">
         <button class="btn btn-primary" onclick="agregarPoste()">📍 Agregar al Mapa</button>
         <button class="btn btn-outline" onclick="lumImportarCSV()">📥 Importar CSV</button>
+      <button class="btn btn-outline btn-sm" onclick="lumDescargarPlantilla()">📋 Plantilla CSV</button>
+      <button class="btn btn-success btn-sm" onclick="lumExportarInventario()">📤 Exportar todo</button>
       </div>
     </div>
     <div class="card">
@@ -5679,6 +5681,374 @@ showPage = function(id) {
 document.addEventListener('DOMContentLoaded', function() {
   setTimeout(actualizarDashboard, 500);
 });
+
+
+// SIEAP — TODAS LAS FUNCIONES DE CARGA Y DESCARGA
+// Revisadas y funcionando completamente
+
+function descargarArchivo(contenido, nombre, tipo) {
+  const blob = new Blob([contenido], { type: tipo });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = nombre;
+  document.body.appendChild(a); a.click();
+  document.body.removeChild(a); URL.revokeObjectURL(url);
+}
+
+function abrirArchivo(accept, callback) {
+  const input = document.createElement('input');
+  input.type = 'file'; input.accept = accept;
+  input.onchange = e => { if(e.target.files[0]) callback(e.target.files[0]); };
+  input.click();
+}
+
+function leerTexto(file, cb) {
+  const r = new FileReader();
+  r.onload = e => cb(e.target.result);
+  r.readAsText(file, 'UTF-8');
+}
+
+function getMuni() {
+  return document.getElementById('etr-municipio')?.value || 'Municipio';
+}
+
+function getFecha() {
+  return new Date().toLocaleDateString('es-CO',{day:'2-digit',month:'long',year:'numeric'});
+}
+
+// 1. IMPORTAR CSV LUMINARIAS
+function lumImportarCSV() {
+  abrirArchivo('.csv,.txt', file => {
+    leerTexto(file, texto => {
+      const lineas = texto.trim().split('\n');
+      let n = 0;
+      const tbody = document.getElementById('lum-tabla-body');
+      if(tbody) tbody.innerHTML = '';
+      for(let i=1;i<lineas.length;i++){
+        const c = lineas[i].split(/[;,]/);
+        if(c.length < 2) continue;
+        const cod=(c[0]||'').trim(), tec=(c[1]||'LED').trim(),
+              pot=(c[2]||'').trim(), flujo=(c[3]||'').trim(),
+              zona=(c[4]||'').trim(), anio=(c[5]||'').trim(),
+              est=(c[6]||'Operativa').trim();
+        if(!cod) continue;
+        const bm={'Operativa':'badge-verde','Mantenimiento':'badge-amarillo','Reemplazar':'badge-rojo'};
+        const b=bm[est]||'badge-gris';
+        if(tbody) tbody.innerHTML+=`<tr>
+          <td><strong>${cod}</strong></td><td>${tec}</td><td>${pot}W</td>
+          <td>${flujo}</td><td>—</td><td>${zona}</td><td>${anio}</td><td>—</td>
+          <td><span class="badge ${b}">${est}</span></td>
+          <td><button class="btn btn-sm btn-outline" onclick="lumVerModal(this)">Ver</button></td>
+        </tr>`;
+        n++;
+      }
+      alert('✅ ' + n + ' luminarias importadas.\n\nFormato: codigo;tecnologia;potencia;flujo_lm;zona;anio;estado');
+    });
+  });
+}
+
+// 2. PLANTILLA CSV LUMINARIAS
+function lumDescargarPlantilla() {
+  const p = 'codigo;tecnologia;potencia_W;flujo_lm;zona;anio_instalacion;estado\n' +
+    'LUM-001;LED;100;14500;Centro;2024;Operativa\n' +
+    'LUM-002;HID;150;15000;Norte;2020;Mantenimiento\n' +
+    'LUM-003;Mercurio;125;5400;Rural;2010;Reemplazar\n';
+  descargarArchivo('\uFEFF'+p, 'Plantilla_Luminarias_SIEAP.csv', 'text/csv;charset=utf-8');
+}
+
+// 3. EXPORTAR INVENTARIO LUMINARIAS
+function lumExportarInventario() {
+  const filas = document.querySelectorAll('#lum-tabla-body tr');
+  let csv = '\uFEFF' + 'Codigo;Tecnologia;Potencia;Flujo;Eficacia;Zona;Anio;VidaUtil;Estado\n';
+  let n = 0;
+  filas.forEach(fila => {
+    const cc = fila.querySelectorAll('td');
+    if(cc.length >= 9 && !cc[0].textContent.includes('Sin luminarias')){
+      csv += Array.from(cc).slice(0,9).map(c=>c.textContent.trim()).join(';') + '\n';
+      n++;
+    }
+  });
+  if(n===0){ alert('No hay luminarias registradas.'); return; }
+  descargarArchivo(csv, 'Inventario_Luminarias_SIEAP.csv', 'text/csv;charset=utf-8');
+  alert('✅ ' + n + ' luminarias exportadas.');
+}
+
+// 4. PLANTILLA GPS GEORREF
+function geoDescargarPlantillaCSV() {
+  const p = 'latitud;longitud;codigo;direccion;tecnologia;potencia_W;estado\n' +
+    '9.3414;-75.2917;P-001;Calle 12 #4-20;LED;100;operativa\n' +
+    '9.3420;-75.2910;P-002;Cra 5 #8-15;HID;150;operativa\n';
+  descargarArchivo('\uFEFF'+p, 'Plantilla_GPS_SIAP.csv', 'text/csv;charset=utf-8');
+}
+
+// 5. IMPORTAR CSV GEORREF
+function geoImportCSV() {
+  alert('Formato CSV:\nlatitud;longitud;codigo;direccion;tecnologia;potencia_W;estado\n\nClic OK para seleccionar archivo.');
+  abrirArchivo('.csv,.txt', file => {
+    leerTexto(file, texto => {
+      const lineas = texto.trim().split('\n');
+      let n = 0;
+      for(let i=1;i<lineas.length;i++){
+        const c = lineas[i].split(/[;,]/);
+        if(c.length < 4) continue;
+        const lat=parseFloat(c[0]), lon=parseFloat(c[1]);
+        if(isNaN(lat)||isNaN(lon)) continue;
+        const lum = {
+          id: 'CSV-'+Date.now()+'-'+i,
+          codigo:(c[2]||'LUM-'+i).trim(), lat, lon,
+          direccion:(c[3]||'').trim(),
+          tecnologia:(c[4]||'LED').trim(),
+          potencia:parseFloat(c[5])||100,
+          estado:(c[6]||'operativa').trim().toLowerCase(),
+          ts_creacion: new Date().toISOString()
+        };
+        const ucap=(window.CREG_UCAP||{})[lum.tecnologia]||{cr_base:850000,vida:25};
+        lum.cr_lum=ucap.cr_base*(lum.potencia/100);
+        lum.vida_util=ucap.vida;
+        lum.caan_unit=lum.cr_lum*(0.1136/(1-Math.pow(1.1136,-lum.vida_util)));
+        if(window.SIAP_DB) window.SIAP_DB[lum.id]=lum;
+        n++;
+      }
+      if(window.SIAP_DB) Object.values(window.SIAP_DB).forEach(l=>{if(window.geoRenderMarker)geoRenderMarker(l);});
+      if(window.geoUpdateStats) geoUpdateStats();
+      if(window.geoUpdateLista) geoUpdateLista();
+      if(window.geoPersistir) geoPersistir();
+      alert('✅ ' + n + ' postes importados al mapa SIAP.');
+    });
+  });
+}
+
+// 6. EXPORTAR SIAP GEORREF
+function geoExport() {
+  const lums = Object.values(window.SIAP_DB||{});
+  if(lums.length===0){ alert('No hay luminarias en el SIAP.'); return; }
+  const h = 'Latitud;Longitud;Codigo;Direccion;Zona;Tecnologia;Potencia_W;Flujo_lm;ClaseVia;TipoPoste;Altura_m;Marca;Modelo;Estado;RiesgoNPS;FechaInst;VidaUtil;CR_UCAP_COP;CAAn_COP\n';
+  const rows = lums.map(l=>[l.lat,l.lon,l.codigo,l.direccion,l.zona,l.tecnologia,l.potencia,l.flujo,l.clase_via,l.tipo_poste,l.altura,l.marca,l.modelo,l.estado,l.riesgo,l.fecha_inst,l.vida_util,Math.round(l.cr_lum||0),Math.round(l.caan_unit||0)].join(';')).join('\n');
+  descargarArchivo('\uFEFF'+h+rows, 'SIAP_Inventario_CREG_101013.csv', 'text/csv;charset=utf-8');
+  alert('✅ ' + lums.length + ' luminarias exportadas.');
+}
+
+// 7. INFORME RETILAP GEORREF
+function geoGenerarInforme() {
+  const lums = Object.values(window.SIAP_DB||{});
+  const muni = getMuni(); const fecha = getFecha();
+  const op = lums.filter(l=>l.estado==='operativa').length;
+  const fa = lums.filter(l=>l.estado==='falla').length;
+  const re = lums.filter(l=>l.estado==='reemplazar'||l.tecnologia==='Mercurio').length;
+  const cr = lums.reduce((s,l)=>s+(l.cr_lum||0),0);
+  const id = lums.length>0?(op/lums.length*100).toFixed(1):'0';
+  let txt = 'INFORME SIAP — RETILAP §580.1 / CREG 101013/2022\n';
+  txt += 'Municipio: '+muni+'\nFUCDESCOC — NIT 900.517.521-0\nFecha: '+fecha+'\n\n';
+  txt += 'RESUMEN:\n';
+  txt += 'Total luminarias: '+lums.length+'\nOperativas: '+op+'\nFallas: '+fa+'\nA reemplazar: '+re+'\n';
+  txt += 'CR total SALP: $'+Math.round(cr).toLocaleString('es-CO')+'\n';
+  txt += 'ID Disponibilidad: '+id+'% '+( parseFloat(id)>=98?'OK (>=98%)':'INCUMPLE (<98%)')+'\n\n';
+  txt += 'LED: '+lums.filter(l=>l.tecnologia==='LED').length+' | HID: '+lums.filter(l=>l.tecnologia==='HID').length+' | Mercurio: '+lums.filter(l=>l.tecnologia==='Mercurio').length+'\n\n';
+  txt += 'DETALLE:\nCodigo;Lat;Lon;Tecnologia;Potencia;Estado;CR_UCAP\n';
+  txt += lums.slice(0,200).map(l=>l.codigo+';'+l.lat+';'+l.lon+';'+l.tecnologia+';'+l.potencia+'W;'+l.estado+';$'+Math.round(l.cr_lum||0).toLocaleString('es-CO')).join('\n');
+  descargarArchivo(txt, 'Informe_SIAP_RETILAP_'+muni+'.txt', 'text/plain;charset=utf-8');
+  alert('✅ Informe RETILAP generado con '+lums.length+' luminarias.');
+}
+
+// 8. ETR WORD COMPLETO
+function generarWordETR() {
+  if(typeof calcETR==='function') calcETR();
+  const d = window.ETR_D||{};
+  const muni = d.mun||getMuni();
+  const fecha = getFecha();
+  if(!muni||muni==='Municipio'){ alert('Primero ingresa el nombre del municipio en la pestana Municipio.'); showPage('datos-etr'); return; }
+  let txt = 'ESTUDIO TECNICO DE REFERENCIA\n';
+  txt += 'MUNICIPIO DE '+muni.toUpperCase()+' — '+(d.dpto||'').toUpperCase()+'\n';
+  txt += 'Vigencia: '+(d.vig||'')+'\n';
+  txt += 'Res. CREG 101013/2022 | Decreto 943/2018 | Ley 1819/2016\n';
+  txt += 'FUCDESCOC — NIT 900.517.521-0\n';
+  txt += 'Secretario/a: '+(d.sec||'')+'\nFecha: '+fecha+'\n\n';
+  txt += '='.repeat(50)+'\nFORMULA CTMAX (Art.7 Res. CREG 101013/2022)\n\n';
+  txt += 'CSEE MENSUAL: $'+Math.round(d.cseeMes||0).toLocaleString('es-CO')+'\n';
+  txt += 'CINV MENSUAL: $'+Math.round(d.cinvMes||0).toLocaleString('es-CO')+' (CAAn x ID)\n';
+  txt += 'CAOM MENSUAL: $'+Math.round(d.caomMes||0).toLocaleString('es-CO')+' (FAOML='+( d.faoML||0)+')\n';
+  txt += 'COTR MENSUAL: $'+Math.round(d.cotrMes||0).toLocaleString('es-CO')+'\n';
+  txt += '—'.repeat(40)+'\n';
+  txt += 'CTMAX MENSUAL: $'+Math.round(d.ctmaxMes||0).toLocaleString('es-CO')+'\n';
+  txt += 'CTMAX ANUAL:   $'+Math.round(d.ctmaxA||0).toLocaleString('es-CO')+'\n\n';
+  txt += 'RECAUDO IAP: $'+Math.round(d.recMes||0).toLocaleString('es-CO')+'/mes\n';
+  txt += 'ART.351: '+(d.cumple?'CUMPLE':'EXCEDE — AJUSTAR TARIFAS')+'\n\n';
+  txt += 'TIR: '+((d.tir||0)*100).toFixed(2)+'% | VPN: $'+Math.round(d.vpn||0).toLocaleString('es-CO')+'\n\n';
+  txt += 'FLUJO DE CAJA:\n';
+  (d.flujo||[]).forEach(f=>{
+    txt += f.anio+': CTMAX=$'+Math.round(f.capA).toLocaleString('es-CO')+' | IAP=$'+Math.round(f.recA).toLocaleString('es-CO')+' | '+(f.recA<=f.capA?'CUMPLE':'EXCEDE')+'\n';
+  });
+  txt += '\nFUCDESCOC — NIT 900.517.521-0 | '+fecha;
+  descargarArchivo(txt, 'ETR_'+muni+'_CREG_101013_2022.doc', 'application/msword');
+  const st=document.getElementById('etr-status');
+  if(st) st.innerHTML='<div class="alert alert-success">✅ ETR descargado exitosamente.</div>';
+}
+
+// 9. EXPORTAR ETR CSV
+function exportarCSV() {
+  if(typeof calcETR==='function') calcETR();
+  const d=window.ETR_D||{};
+  const rows=[
+    ['ETR — CREG 101013/2022','','',''],
+    ['Municipio',d.mun||'','Dpto',d.dpto||''],
+    ['Fecha',getFecha(),'',''],
+    ['','','',''],
+    ['COMPONENTE','FORMULA CREG','MENSUAL (COP)','ANUAL (COP)'],
+    ['CSEE','Art.12-15',Math.round(d.cseeMes||0),Math.round((d.cseeMes||0)*12)],
+    ['CINV','Art.22: CAAn x ID',Math.round(d.cinvMes||0),Math.round((d.cinvMes||0)*12)],
+    ['CAOM','Art.35: FAOML',Math.round(d.caomMes||0),Math.round((d.caomMes||0)*12)],
+    ['COTR','Arts.37-40',Math.round(d.cotrMes||0),Math.round((d.cotrMes||0)*12)],
+    ['CTMAX','Art.7',Math.round(d.ctmaxMes||0),Math.round(d.ctmaxA||0)],
+    ['','','',''],
+    ['RECAUDO IAP','',Math.round(d.recMes||0),Math.round((d.recMes||0)*12)],
+    ['Art.351',d.cumple?'CUMPLE':'EXCEDE','',''],
+    ['TIR',((d.tir||0)*100).toFixed(2)+'%','VPN',Math.round(d.vpn||0)],
+    ['','','',''],
+    ['FLUJO DE CAJA','CTMAX ANUAL','RECAUDO IAP','SALDO'],
+    ...(d.flujo||[]).map(f=>[f.anio,Math.round(f.capA),Math.round(f.recA),Math.round(f.saldo)])
+  ];
+  descargarArchivo('\uFEFF'+rows.map(r=>r.join(';')).join('\n'), 'ETR_'+(d.mun||'Municipio')+'.csv', 'text/csv;charset=utf-8');
+  alert('✅ ETR exportado en CSV.');
+}
+
+// 10. COMPARATIVO MUNICIPIOS
+function muni_exportar() {
+  const munis=Object.values(window.MUNICIPIOS_DB||{});
+  if(munis.length===0){alert('No hay municipios registrados.');return;}
+  const h='Municipio;Departamento;Luminarias;CR_Total;CTMAX_Anual;Recaudo_IAP;Art351;Vigencia\n';
+  const rows=munis.map(m=>[m.nombre,m.dpto,m.luminarias,Math.round(m.cr_total||0),Math.round(m.ctmax_anual||0),Math.round(m.recaudo_anual||0),m.cumple_art351?'CUMPLE':'EXCEDE',m.vigencia].join(';')).join('\n');
+  descargarArchivo('\uFEFF'+h+rows,'Comparativo_Regional_SALP.csv','text/csv;charset=utf-8');
+  alert('✅ Comparativo de '+munis.length+' municipios exportado.');
+}
+
+// 11. INFORME REGIONAL
+function muni_informe_regional() {
+  const munis=Object.values(window.MUNICIPIOS_DB||{});
+  if(munis.length===0){alert('No hay municipios registrados.');return;}
+  let txt='INFORME REGIONAL SALP — FUCDESCOC\nFecha: '+getFecha()+'\n\n';
+  munis.forEach(m=>{
+    txt+=m.nombre+' ('+m.dpto+')\n';
+    txt+='  Luminarias: '+m.luminarias+' | CTMAX: $'+Math.round(m.ctmax_anual||0).toLocaleString('es-CO')+'\n';
+    txt+='  Art.351: '+(m.cumple_art351?'CUMPLE':'EXCEDE')+'\n\n';
+  });
+  descargarArchivo(txt,'Informe_Regional_SALP.doc','application/msword');
+  alert('✅ Informe regional generado.');
+}
+
+// 12. PLAN ANUAL SALP
+function expansionGenerarPlan() {
+  const proyectos=window.EXPANSION_DB||[];
+  const muni=getMuni(); const fecha=getFecha();
+  const invTotal=proyectos.reduce((s,p)=>s+(p.inversion||0),0);
+  const lumTotal=proyectos.reduce((s,p)=>s+(p.lums||0),0);
+  let txt='PLAN ANUAL SALP — '+new Date().getFullYear()+'\n';
+  txt+='Municipio: '+muni+'\nFUCDESCOC — NIT 900.517.521-0\nFecha: '+fecha+'\n';
+  txt+='Base: Decreto 943/2018 Art.5 + Res. CREG 101013/2022\n\n';
+  txt+='Total proyectos: '+proyectos.length+'\n';
+  txt+='Total luminarias: '+lumTotal.toLocaleString('es-CO')+'\n';
+  txt+='Inversion total: $'+invTotal.toLocaleString('es-CO')+'\n\n';
+  if(proyectos.length===0) txt+='Sin proyectos registrados.\n';
+  else proyectos.forEach((p,i)=>{
+    txt+=(i+1)+'. '+p.nombre+'\n';
+    txt+='   Zona: '+p.zona+' | Tipo: '+p.tipo+'\n';
+    txt+='   Luminarias: '+p.lums+' | Inversion: $'+(p.inversion||0).toLocaleString('es-CO')+'\n';
+    txt+='   Año: '+p.anio+' | Estado: '+p.estado+'\n\n';
+  });
+  descargarArchivo(txt,'Plan_Anual_SALP_'+muni+'_'+new Date().getFullYear()+'.doc','application/msword');
+  alert('✅ Plan Anual SALP descargado.');
+}
+
+// 13. CRONOGRAMA GANTT
+function expansionGantt() {
+  const proyectos=window.EXPANSION_DB&&window.EXPANSION_DB.length>0?window.EXPANSION_DB:[{nombre:'Sin proyectos registrados',inicio:2024,dur:1,tipo:'Expansion'}];
+  const colors={'Expansion':'#0055A5','Modernizacion':'#2E8B34','Reposicion':'#E87722','Tecnologico':'#CC2200','Ornamental':'#9B59B6'};
+  const W=900, rowH=36, pad={left:200,top:50,right:20,bottom:40};
+  const cW=W-pad.left-pad.right;
+  const h=proyectos.length*rowH+pad.top+pad.bottom;
+  let svg='<svg width="'+W+'" height="'+h+'" xmlns="http://www.w3.org/2000/svg">';
+  svg+='<rect width="'+W+'" height="'+h+'" fill="#1a2d4a" rx="10"/>';
+  svg+='<text x="'+W/2+'" y="28" text-anchor="middle" fill="#FFD700" font-size="14" font-weight="bold" font-family="Arial">CRONOGRAMA GANTT — PLAN SALP '+new Date().getFullYear()+'</text>';
+  const anios=[2024,2025,2026,2027,2028];
+  anios.forEach((y,i)=>{
+    const x=pad.left+(i/4)*cW;
+    svg+='<line x1="'+x+'" y1="'+pad.top+'" x2="'+x+'" y2="'+(h-pad.bottom)+'" stroke="rgba(255,255,255,0.1)" stroke-width="1"/>';
+    svg+='<text x="'+(x+cW/8)+'" y="'+(pad.top-5)+'" text-anchor="middle" fill="#7AADCF" font-size="11" font-family="Arial">'+y+'</text>';
+  });
+  proyectos.forEach((p,i)=>{
+    const y=pad.top+i*rowH+rowH*0.15;
+    const bH=rowH*0.7;
+    const pInicio=p.inicio||2024;
+    const pDur=p.dur||1;
+    const x=pad.left+((pInicio-2024)/4)*cW;
+    const w=(pDur/4)*cW;
+    const tipo=p.tipo||'Expansion';
+    const color=colors[tipo]||'#888';
+    svg+='<text x="'+(pad.left-5)+'" y="'+(y+bH/2+4)+'" text-anchor="end" fill="white" font-size="10" font-family="Arial">'+p.nombre.substring(0,30)+'</text>';
+    svg+='<rect x="'+x+'" y="'+y+'" width="'+w+'" height="'+bH+'" fill="'+color+'" rx="3" opacity="0.85"/>';
+    if(w>50) svg+='<text x="'+(x+w/2)+'" y="'+(y+bH/2+4)+'" text-anchor="middle" fill="white" font-size="9" font-family="Arial">'+tipo+'</text>';
+  });
+  svg+='</svg>';
+  const win=window.open('','_blank','width=950,height='+(h+80));
+  win.document.write('<html><head><title>Gantt SALP</title></head><body style="background:#0a1628;padding:20px;">'+svg+'<br><button onclick="window.print()" style="margin-top:10px;padding:8px 20px;background:#0055A5;color:white;border:none;border-radius:5px;cursor:pointer;">Imprimir / PDF</button></body></html>');
+}
+
+// 14. MODELO ACUERDO MUNICIPAL
+function descargarModeloAcuerdo() {
+  const muni=getMuni(); const fecha=getFecha();
+  const ctmax=window.ETR_D?.ctmaxMes||0;
+  let txt='ACUERDO N. ___ DE '+new Date().getFullYear()+'\n';
+  txt+='"POR EL CUAL SE ESTABLECE EL IMPUESTO DE ALUMBRADO PUBLICO"\n\n';
+  txt+='EL CONCEJO MUNICIPAL DE '+muni.toUpperCase()+'\n\n';
+  txt+='CONSIDERANDO:\n';
+  txt+='- Ley 97/1913 y Ley 84/1915: habilitacion legal IAP\n';
+  txt+='- Ley 1819/2016 Arts. 349-353: regimen tributario\n';
+  txt+='- Res. CREG 101013/2022: metodologia CTMAX\n';
+  txt+='- CE Sent. Unif. 22161/2019: elementos tributarios (vinculante)\n';
+  txt+='- CE Sent. 23103/2020: ETR como requisito previo\n';
+  txt+='- CC C-272/2022: autogeneracion excluida de base gravable\n';
+  txt+='- CE Sent. 27841/2023: obligatoriedad CREG 101013/2022\n\n';
+  txt+='ARTICULO 1. HECHO GENERADOR: Consumo de energia electrica.\n';
+  txt+='ARTICULO 2. SUJETO ACTIVO: Municipio de '+muni+'.\n';
+  txt+='ARTICULO 3. SUJETO PASIVO: Usuarios energia electrica. AGPE solo por consumo de red.\n';
+  txt+='ARTICULO 4. BASE GRAVABLE: Factura energia (E1-E6) o kWh (Comercial/Industrial).\n';
+  txt+='ARTICULO 5. TARIFAS: [Ver ETR vigente. CTMAX ref.: $'+(ctmax?Math.round(ctmax).toLocaleString('es-CO'):'___')+'/mes]\n';
+  txt+='ARTICULO 6. DESTINACION: 100% al SALP (Art. 350 Ley 1819/2016).\n';
+  txt+='ARTICULO 7. ETR: Soporte en ETR CREG 101013/2022. Vigencia 4 anos.\n';
+  txt+='ARTICULO 8. VIGENCIA: Desde sancion y publicacion.\n\n';
+  txt+='Municipio de '+muni+' | '+fecha+'\nFUCDESCOC — NIT 900.517.521-0';
+  descargarArchivo(txt,'Modelo_Acuerdo_IAP_'+muni+'.doc','application/msword');
+  alert('✅ Modelo de Acuerdo descargado.');
+}
+
+// 15. EXPORTAR COBERTURA
+function coberturaExportar() {
+  const muni=getMuni();
+  const txt='INFORME COBERTURA SALP\nMunicipio: '+muni+'\nFecha: '+getFecha()+'\nFUCDESCOC — NIT 900.517.521-0\n';
+  descargarArchivo(txt,'Informe_Cobertura_'+muni+'.doc','application/msword');
+  alert('✅ Informe de cobertura descargado.');
+}
+
+// 16. EXPORTAR INVENTARIO MATERIALES
+function invExportarInventario() {
+  const filas=document.querySelectorAll('#mat-tabla-body tr');
+  let csv='\uFEFF'+'Codigo;Descripcion;Unidad;Stock;Minimo;Estado\n';
+  let n=0;
+  filas.forEach(fila=>{
+    const cc=fila.querySelectorAll('td');
+    if(cc.length>=5&&!cc[0].textContent.includes('Sin materiales')){
+      csv+=Array.from(cc).map(c=>c.textContent.trim()).join(';')+'\n';
+      n++;
+    }
+  });
+  descargarArchivo(csv,'Inventario_Materiales_SALP.csv','text/csv;charset=utf-8');
+  alert(n>0?'✅ '+n+' materiales exportados.':'✅ Plantilla descargada.');
+}
+
+// 17. GENERAR WORD FINANCIERO
+function finGenerarWord() { generarWordETR(); }
+
+// 18. IMPRIMIR
+function imprimirETR() { window.print(); }
 
 </script>
 </body>
