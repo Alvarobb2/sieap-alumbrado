@@ -988,7 +988,7 @@ function calcularFinanciero() {
   const tb=document.getElementById('tabla-flujo'); if(tb) tb.innerHTML='<tr><td colspan="9" style="text-align:center;padding:20px;color:#aaa;">Ingresa el valor de activos SALP para calcular</td></tr>';
   return;
   }
-  const activos = parseFloat(document.getElementById('fin-activos').value)||107186810506;
+  activos = parseFloat(document.getElementById('fin-activos').value)||107186810506;
   const waccPct = parseFloat(document.getElementById('fin-wacc').value)||11.36;
   const wacc = waccPct/100;
   const vida = parseFloat(document.getElementById('fin-vida').value)||20;
