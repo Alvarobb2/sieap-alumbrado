@@ -3138,44 +3138,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // ============ CHARTS ============
 function renderCharts() {
-  const techData = [
-    {label:'LED', val:2841, color:'#0055A5'},
-    {label:'Sodio AP', val:812, color:'#E87722'},
-    {label:'Mercurio', val:189, color:'#CC2200'},
-  ];
+  // Gráficas vacías — se llenan con datos reales del usuario
   const ct = document.getElementById('chart-tech');
-  if(ct) {
-    const maxVal = Math.max(...techData.map(d=>d.val));
-    ct.innerHTML = techData.map(d => `
-      <div class="bar-item">
-        <div class="bar-val">${d.val}</div>
-        <div class="bar-fill" style="height:${Math.round((d.val/maxVal)*100)}px;background:${d.color};"></div>
-        <div class="bar-label">${d.label}</div>
-      </div>`).join('');
-  }
-  const meses = ['Ene','Feb','Mar','Abr','May','Jun'];
-  const energias = [142800, 138400, 145200, 141600, 139800, 143200];
+  if(ct) ct.innerHTML = '<div style="text-align:center;padding:30px;color:#aaa;font-size:0.85rem;">Sin datos. Registre luminarias para ver la distribución.</div>';
   const ce = document.getElementById('chart-energia');
-  if(ce) {
-    const maxE = Math.max(...energias);
-    ce.innerHTML = meses.map((m,i) => `
-      <div class="bar-item">
-        <div class="bar-val" style="font-size:0.62rem;">${(energias[i]/1000).toFixed(1)}k</div>
-        <div class="bar-fill" style="height:${Math.round((energias[i]/maxE)*110)}px;background:#3399CC;"></div>
-        <div class="bar-label">${m}</div>
-      </div>`).join('');
-  }
+  if(ce) ce.innerHTML = '<div style="text-align:center;padding:30px;color:#aaa;font-size:0.85rem;">Sin datos. Configure el ETR para ver el consumo.</div>';
 }
-
-// ============ SIMULACIÓN FOTOMÉTRICA ============
-const retilap = {
-  M1: {luxMin:150, lux:'≥2.0 cd/m²', uo:0.40},
-  M2: {luxMin:75, lux:'≥1.5 cd/m²', uo:0.40},
-  M3: {luxMin:30, lux:'≥1.0 cd/m²', uo:0.40},
-  M4: {luxMin:15, lux:'≥0.5 cd/m²', uo:0.40},
-  P:  {luxMin:10, lux:'≥10 lux', uo:0.25},
-};
-
 function calcularSimulacion() {
   try {
     const via = document.getElementById('sim-via').value;
