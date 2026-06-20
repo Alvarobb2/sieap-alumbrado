@@ -1,3 +1,33 @@
+
+// ── NAVEGACIÓN PRINCIPAL ─────────────────────────────────
+function showPage(id) {
+  // Ocultar todas las páginas
+  var pages = document.querySelectorAll('.page');
+  for(var i=0;i<pages.length;i++) {
+    pages[i].style.display = 'none';
+    pages[i].classList.remove('active');
+  }
+  // Mostrar la página seleccionada
+  var target = document.getElementById('page-' + id);
+  if(target) {
+    target.style.display = 'block';
+    target.classList.add('active');
+  }
+  // Actualizar sidebar
+  var items = document.querySelectorAll('.sidebar-item');
+  for(var j=0;j<items.length;j++) {
+    items[j].classList.remove('active');
+    var oc = items[j].getAttribute('onclick') || '';
+    if(oc.indexOf("'"+id+"'") !== -1 || oc.indexOf('"'+id+'"') !== -1) {
+      items[j].classList.add('active');
+    }
+  }
+  // Iniciar mapa si es geo
+  if(id === 'geo-pro' && typeof geoInitMap === 'function') {
+    setTimeout(geoInitMap, 150);
+  }
+}
+
 setInterval(updateClock, 1000);
 updateClock();
 const postesData = [];
@@ -86,11 +116,8 @@ document.addEventListener('keydown', function(e) {
   if (geoMap) geoMap.getContainer().style.cursor = '';
   }
 });
-const _origShowPage = showPage;
-showPage = function(id) {
-  _origShowPage.call(this, id);
-  if (id === 'geo-pro') { setTimeout(geoInitMap, 100); }
-};
+
+
 let MUNICIPIOS_DB = JSON.parse(localStorage.getItem('MUNICIPIOS_DB') || '{}');
 const _origCalcETR = calcETR;
 calcETR = function() {
@@ -125,11 +152,8 @@ document.addEventListener('DOMContentLoaded', function() {
   if(typeof calcTribBase === 'function') calcTribBase();
   }, 600);
 });
-const _showPageOrig = showPage;
-showPage = function(id) {
-  _showPageOrig.apply(this, arguments);
-  if(id === 'dashboard') setTimeout(actualizarDashboard, 200);
-};
+
+
 document.addEventListener('DOMContentLoaded', function() {
   setTimeout(actualizarDashboard, 500);
 });
@@ -3118,16 +3142,6 @@ function safeSet(id, val) {
 function setRes(id, html){ const e=document.getElementById(id); if(e) e.innerHTML=html; }
 
 function setVal(id, v) { const e=document.getElementById(id); if(e) e.value=v||''; }
-
-function showPage(id) {
- document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
- document.querySelectorAll('.sidebar-item').forEach(s => s.classList.remove('active'));
- document.getElementById('page-' + id).classList.add('active');
- event && event.target.closest('.sidebar-item') && event.target.closest('.sidebar-item').classList.add('active');
-document.querySelectorAll('.sidebar-item').forEach(s => {
- if(s.getAttribute('onclick') && s.getAttribute('onclick').includes("'"+id+"'")) s.classList.add('active');
- });
-}
 
 function showTab(btn, panelId) {
  const parent = btn.closest('.card') || btn.closest('.page');
