@@ -664,7 +664,7 @@
 <main class="main">
 
 <!-- ===================== DASHBOARD ===================== -->
-<div id="page-dashboard" class="page active">
+<div id="page-dashboard" class="page">
   <div class="page-header">
     <span class="page-header-icon">🏠</span>
     <div>
@@ -672,58 +672,47 @@
       <p>Resumen ejecutivo del Sistema de Alumbrado Público Municipal · FUCDESCOC</p>
     </div>
   </div>
-
   <div class="grid-4" style="margin-bottom:18px;">
     <div class="kpi azul"><div class="kpi-value" id="dash-total-lum">0</div><div class="kpi-label">Total Luminarias</div><div class="kpi-sub">Inventario SALP</div></div>
     <div class="kpi verde"><div class="kpi-value" id="dash-cobertura">0%</div><div class="kpi-label">Cobertura Urbana</div><div class="kpi-sub">Sobre malla vial</div></div>
     <div class="kpi naranja"><div class="kpi-value" id="dash-incidencias">0</div><div class="kpi-label">Incidencias Abiertas</div><div class="kpi-sub">Último mes</div></div>
     <div class="kpi rojo"><div class="kpi-value" id="dash-costo-etr">$0</div><div class="kpi-label">Costo ETR Anual</div><div class="kpi-sub">Base CREG 101013/2022</div></div>
   </div>
-
   <div class="grid-2">
     <div class="card">
       <div class="card-title">📊 Distribución por Tecnología</div>
-      <div class="bar-chart" id="chart-tech"></div>
-      <div style="display:flex;gap:10px;margin-top:8px;flex-wrap:wrap;">
-        <span style="font-size:0.72rem;display:flex;align-items:center;gap:4px;"><span style="width:10px;height:10px;background:#0055A5;border-radius:2px;display:inline-block;"></span>LED</span>
-        <span style="font-size:0.72rem;display:flex;align-items:center;gap:4px;"><span style="width:10px;height:10px;background:#E87722;border-radius:2px;display:inline-block;"></span>Sodio AP</span>
-        <span style="font-size:0.72rem;display:flex;align-items:center;gap:4px;"><span style="width:10px;height:10px;background:#CC2200;border-radius:2px;display:inline-block;"></span>Mercurio</span>
-        <span style="font-size:0.72rem;display:flex;align-items:center;gap:4px;"><span style="width:10px;height:10px;background:#888;border-radius:2px;display:inline-block;"></span>Otras</span>
+      <div id="chart-tech" style="text-align:center;padding:40px;color:#aaa;font-size:0.85rem;">
+        <div style="font-size:2rem;margin-bottom:8px;">💡</div>
+        Sin luminarias registradas.<br>Ve a <strong>Inventario de Luminarias</strong> para agregar.
       </div>
     </div>
     <div class="card">
-      <div class="card-title">⚡ Consumo Energético Mensual (kWh)</div>
-      <div class="bar-chart" id="chart-energia"></div>
+      <div class="card-title">⚡ Consumo Energético Mensual</div>
+      <div id="chart-energia" style="text-align:center;padding:40px;color:#aaa;font-size:0.85rem;">
+        <div style="font-size:2rem;margin-bottom:8px;">📊</div>
+        Sin datos de consumo.<br>Ve a <strong>Datos & Generar ETR</strong> para configurar.
+      </div>
     </div>
   </div>
-
   <div class="grid-3">
     <div class="card">
       <div class="card-title">📈 Indicadores de Disponibilidad</div>
       <div style="display:flex;flex-direction:column;gap:10px;">
         <div>
-          <div style="display:flex;justify-content:space-between;font-size:0.8rem;margin-bottom:4px;">
-            <span>Urbano</span><strong>0%</strong>
-          </div>
-          <div class="progress-wrap"><div class="progress-bar verde" style="width:0%"></div></div>
+          <div style="display:flex;justify-content:space-between;font-size:0.8rem;margin-bottom:4px;"><span>Urbano</span><strong id="disp-urb">0%</strong></div>
+          <div class="progress-wrap"><div class="progress-bar verde" id="bar-urb" style="width:0%"></div></div>
         </div>
         <div>
-          <div style="display:flex;justify-content:space-between;font-size:0.8rem;margin-bottom:4px;">
-            <span>Rural</span><strong>0%</strong>
-          </div>
-          <div class="progress-wrap"><div class="progress-bar naranja" style="width:0%"></div></div>
+          <div style="display:flex;justify-content:space-between;font-size:0.8rem;margin-bottom:4px;"><span>Rural</span><strong id="disp-rur">0%</strong></div>
+          <div class="progress-wrap"><div class="progress-bar naranja" id="bar-rur" style="width:0%"></div></div>
         </div>
         <div>
-          <div style="display:flex;justify-content:space-between;font-size:0.8rem;margin-bottom:4px;">
-            <span>Zonas periféricas</span><strong>0%</strong>
-          </div>
-          <div class="progress-wrap"><div class="progress-bar rojo" style="width:0%"></div></div>
+          <div style="display:flex;justify-content:space-between;font-size:0.8rem;margin-bottom:4px;"><span>Zonas periféricas</span><strong id="disp-per">0%</strong></div>
+          <div class="progress-wrap"><div class="progress-bar rojo" id="bar-per" style="width:0%"></div></div>
         </div>
         <div>
-          <div style="display:flex;justify-content:space-between;font-size:0.8rem;margin-bottom:4px;">
-            <span>Parques / Plazas</span><strong>0%</strong>
-          </div>
-          <div class="progress-wrap"><div class="progress-bar azul" style="width:0%"></div></div>
+          <div style="display:flex;justify-content:space-between;font-size:0.8rem;margin-bottom:4px;"><span>Parques / Plazas</span><strong id="disp-pq">0%</strong></div>
+          <div class="progress-wrap"><div class="progress-bar azul" id="bar-pq" style="width:0%"></div></div>
         </div>
       </div>
     </div>
@@ -731,37 +720,32 @@
       <div class="card-title">🔧 Estado de Mantenimiento</div>
       <div style="display:flex;flex-direction:column;gap:8px;">
         <div style="display:flex;justify-content:space-between;align-items:center;padding:6px;background:#F0F4F8;border-radius:6px;">
-          <span style="font-size:0.82rem;">✅ Operativas</span>
-          <strong style="color:var(--verde);">0</strong>
+          <span style="font-size:0.82rem;">✅ Operativas</span><strong id="mant-op" style="color:var(--verde);">0</strong>
         </div>
         <div style="display:flex;justify-content:space-between;align-items:center;padding:6px;background:#FFF3CD;border-radius:6px;">
-          <span style="font-size:0.82rem;">🔧 En mantenimiento</span>
-          <strong style="color:var(--naranja);">0</strong>
+          <span style="font-size:0.82rem;">🔧 En mantenimiento</span><strong id="mant-mant" style="color:var(--naranja);">0</strong>
         </div>
         <div style="display:flex;justify-content:space-between;align-items:center;padding:6px;background:#F8D7DA;border-radius:6px;">
-          <span style="font-size:0.82rem;">⚠️ Con falla</span>
-          <strong style="color:var(--rojo);">0</strong>
+          <span style="font-size:0.82rem;">⚠️ Con falla</span><strong id="mant-falla" style="color:var(--rojo);">0</strong>
         </div>
         <div style="display:flex;justify-content:space-between;align-items:center;padding:6px;background:#E2E3E5;border-radius:6px;">
-          <span style="font-size:0.82rem;">🔴 Apagadas</span>
-          <strong style="color:#555;">0</strong>
+          <span style="font-size:0.82rem;">🔴 Apagadas</span><strong style="color:#555;">0</strong>
         </div>
       </div>
     </div>
     <div class="card">
       <div class="card-title">📅 Actividad Reciente</div>
-      <ul class="timeline">
-          
-        </ul>
+      <ul class="timeline" id="dash-timeline">
+        <li><div class="tl-date">—</div><div class="tl-text" style="color:#aaa;">Sin actividad. Comienza registrando datos en los módulos.</div></li>
+      </ul>
     </div>
   </div>
-
   <div class="alert alert-info">
-    ℹ️ <div><strong>Resolución CREG 101013 de 2022:</strong> El costo máximo para remunerar actividades del SALP debe revisarse anualmente. Próxima actualización del ETR: <strong>Diciembre 2026</strong>.</div>
+    ℹ️ <strong>Bienvenido al SIEAP.</strong> Empieza por: <strong>1)</strong> Registrar el municipio en <em>Gestión Multi-Municipio</em> · <strong>2)</strong> Ingresar inventario en <em>Datos & Generar ETR</em> · <strong>3)</strong> Georreferenciar luminarias en <em>SIAP Georreferenciación</em>.
   </div>
 </div>
 
-<!-- ===================== COBERTURA ===================== -->
+<!-- ===================== COBERTURA<!-- ===================== COBERTURA ===================== -->
 <div id="page-cobertura" class="page">
   <div class="page-header">
     <span class="page-header-icon">🗺️</span>
@@ -1244,10 +1228,10 @@
   </div>
 
   <div class="grid-4" style="margin-bottom:18px;">
-    <div class="kpi verde"><div class="kpi-value">24</div><div class="kpi-label">Rutinas Prev. / Mes</div></div>
+    <div class="kpi verde"><div class="kpi-value">0</div><div class="kpi-label">Rutinas Prev. / Mes</div></div>
     <div class="kpi naranja"><div class="kpi-value">0</div><div class="kpi-label">En Mantenimiento</div></div>
-    <div class="kpi azul"><div class="kpi-value">98.2%</div><div class="kpi-label">MTTR < 48h</div><div class="kpi-sub">Tiempo medio reparación</div></div>
-    <div class="kpi rojo"><div class="kpi-value">$12.4M</div><div class="kpi-label">Costo Mant. Mes</div></div>
+    <div class="kpi azul"><div class="kpi-value">0%</div><div class="kpi-label">MTTR < 48h</div><div class="kpi-sub">Tiempo medio reparación</div></div>
+    <div class="kpi rojo"><div class="kpi-value">$0</div><div class="kpi-label">Costo Mant. Mes</div></div>
   </div>
 
   <div class="grid-2">
@@ -1359,7 +1343,7 @@
           <span>🔵 En atención</span><strong style="color:var(--azul-medio);">32</strong>
         </div>
         <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 12px;background:#E2E3E5;border-radius:7px;">
-          <span>✅ Cerradas (mes)</span><strong>214</strong>
+          <span>✅ Cerradas (mes)</span><strong>0</strong>
         </div>
       </div>
     </div>
@@ -1431,16 +1415,8 @@
       <div class="table-wrap">
         <table>
           <thead><tr><th>Estrato/Sector</th><th>Tarifa Base</th><th>Tope máx. mensual</th><th>Vigencia</th></tr></thead>
-          <tbody>
-            <tr><td>Estrato 1</td><td>2.5%</td><td>$4,200</td><td><span class="badge badge-verde">2024-2027</span></td></tr>
-            <tr><td>Estrato 2</td><td>3.0%</td><td>$6,800</td><td><span class="badge badge-verde">2024-2027</span></td></tr>
-            <tr><td>Estrato 3</td><td>4.5%</td><td>$12,500</td><td><span class="badge badge-verde">2024-2027</span></td></tr>
-            <tr><td>Estrato 4</td><td>6.0%</td><td>$22,000</td><td><span class="badge badge-verde">2024-2027</span></td></tr>
-            <tr><td>Estrato 5</td><td>8.0%</td><td>$38,000</td><td><span class="badge badge-verde">2024-2027</span></td></tr>
-            <tr><td>Estrato 6</td><td>10.0%</td><td>$55,000</td><td><span class="badge badge-verde">2024-2027</span></td></tr>
-            <tr><td>Comercial</td><td>$85/kWh</td><td>Sin tope</td><td><span class="badge badge-verde">2024-2027</span></td></tr>
-            <tr><td>Industrial</td><td>$95/kWh</td><td>Sin tope</td><td><span class="badge badge-verde">2024-2027</span></td></tr>
-            <tr><td>Oficial</td><td>Exento</td><td>$0</td><td><span class="badge badge-gris">Acuerdo</span></td></tr>
+          <tbody id="tarifa-tabla">
+            <tr><td colspan="4" style="text-align:center;padding:20px;color:#aaa;">Sin tarifas configuradas. Use el módulo <strong>Datos & Generar ETR</strong> para definir tarifas.</td></tr>
           </tbody>
         </table>
       </div>
@@ -1450,13 +1426,11 @@
   <div class="card">
     <div class="card-title">📊 Proyección de Ingresos IAP</div>
     <div class="grid-3">
-      <div class="kpi azul"><div class="kpi-value">28,420</div><div class="kpi-label">Contribuyentes activos</div><div class="kpi-sub">Facturados este mes</div></div>
-      <div class="kpi verde"><div class="kpi-value">$284.2M</div><div class="kpi-label">Recaudo mensual</div><div class="kpi-sub">Proyección junio 2026</div></div>
-      <div class="kpi naranja"><div class="kpi-value">$2,810M</div><div class="kpi-label">Recaudo anual estimado</div><div class="kpi-sub">vs CTMAX $2,340M</div></div>
+      <div class="kpi azul"><div class="kpi-value">0</div><div class="kpi-label">Contribuyentes activos</div><div class="kpi-sub">Facturados este mes</div></div>
+      <div class="kpi verde"><div class="kpi-value">$0</div><div class="kpi-label">Recaudo mensual</div><div class="kpi-sub">Proyección junio 2026</div></div>
+      <div class="kpi naranja"><div class="kpi-value">$0</div><div class="kpi-label">Recaudo anual estimado</div><div class="kpi-sub">vs CTMAX $2,340M</div></div>
     </div>
-    <div class="alert alert-success" style="margin-top:14px;">
-      ✅ <strong>Cumplimiento Ley 1819/2016 Art. 351:</strong> El recaudo proyectado ($2,810M) supera el CTMAX ($2,340M) en $470M. Se recomienda revisar la escala tarifaria para ajustar al límite legal.
-    </div>
+    <div class="alert alert-info">ℹ️ Complete el ETR para ver la proyección de recaudo IAP.</div>
   </div>
 </div>
 
@@ -1624,10 +1598,10 @@
   </div>
 
   <div class="grid-4" style="margin-bottom:18px;">
-    <div class="kpi azul"><div class="kpi-value">14</div><div class="kpi-label">Proyectos</div><div class="kpi-sub">Cuatrienio 2024-2027</div></div>
-    <div class="kpi verde"><div class="kpi-value">428</div><div class="kpi-label">Luminarias a instalar</div></div>
+    <div class="kpi azul"><div class="kpi-value">0</div><div class="kpi-label">Proyectos</div><div class="kpi-sub">Cuatrienio 2024-2027</div></div>
+    <div class="kpi verde"><div class="kpi-value">0</div><div class="kpi-label">Luminarias a instalar</div></div>
     <div class="kpi naranja"><div class="kpi-value">0</div><div class="kpi-label">Mercurio a reemplazar</div></div>
-    <div class="kpi rojo"><div class="kpi-value">$4.2B</div><div class="kpi-label">Inversión estimada</div></div>
+    <div class="kpi rojo"><div class="kpi-value">$0</div><div class="kpi-label">Inversión estimada</div></div>
   </div>
 
   <div class="card">
@@ -1654,21 +1628,21 @@
     <div style="display:flex;flex-direction:column;gap:10px;">
       <div>
         <div style="display:flex;justify-content:space-between;font-size:0.82rem;margin-bottom:5px;">
-          <span>💰 Presupuesto ejecutado</span><strong>38.2% ($1,603M de $4,200M)</strong>
+          <span>💰 Presupuesto ejecutado</span><strong>0%</strong>
         </div>
-        <div class="progress-wrap"><div class="progress-bar azul" style="width:38.2%"></div></div>
+        <div class="progress-wrap"><div class="progress-bar azul" style="width:0%"></div></div>
       </div>
       <div>
         <div style="display:flex;justify-content:space-between;font-size:0.82rem;margin-bottom:5px;">
-          <span>💡 Luminarias instaladas/reemplazadas</span><strong>503 de 617 planeadas (81.5%)</strong>
+          <span>💡 Luminarias instaladas/reemplazadas</span><strong>0 de 0</strong>
         </div>
-        <div class="progress-wrap"><div class="progress-bar verde" style="width:81.5%"></div></div>
+        <div class="progress-wrap"><div class="progress-bar verde" style="width:0%"></div></div>
       </div>
       <div>
         <div style="display:flex;justify-content:space-between;font-size:0.82rem;margin-bottom:5px;">
-          <span>🗓️ Proyectos completados</span><strong>2 de 14 (14.3%)</strong>
+          <span>🗓️ Proyectos completados</span><strong>0 de 0</strong>
         </div>
-        <div class="progress-wrap"><div class="progress-bar naranja" style="width:14.3%"></div></div>
+        <div class="progress-wrap"><div class="progress-bar naranja" style="width:0%"></div></div>
       </div>
     </div>
   </div>
