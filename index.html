@@ -1373,15 +1373,26 @@
     <span class="page-header-icon">💰</span>
     <div>
       <h1>Módulo de Tarifas — Impuesto de Alumbrado Público</h1>
-      <p>Liquidación IAP · Escala tarifaria · Acuerdo municipal · Art. 351 Ley 1819/2016</p>
+      <p>Escala tarifaria · Calculadora IAP · Importar/Exportar · Art. 351 Ley 1819/2016 + CE Sent. 22161/2019</p>
     </div>
   </div>
 
-  <div class="alert alert-info">ℹ️ <strong>Ley 1819/2016, Art. 351:</strong> El valor del IAP recaudado no puede exceder el costo total de prestación del servicio determinado en el ETR conforme a metodología CREG.</div>
+  <div class="alert alert-info">ℹ️ <strong>Ley 1819/2016 Art.351 + CE Sent. 22161/2019:</strong> El recaudo IAP no puede exceder el CTMAX del ETR. Las tarifas deben estar definidas en el Acuerdo Municipal conforme a metodología CREG 101013/2022.</div>
+
+  <!-- TOOLBAR TARIFAS -->
+  <div style="background:#1a2d4a;border-radius:10px;padding:12px 16px;margin-bottom:16px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+    <button class="btn btn-primary btn-sm" onclick="tarifaImportarCSV()">📥 Importar escala tarifaria CSV</button>
+    <button class="btn btn-outline btn-sm" onclick="tarifaDescargarPlantilla()" style="color:white;border-color:#2ECC71;">📋 Descargar plantilla</button>
+    <button class="btn btn-success btn-sm" onclick="tarifaExportar()">📤 Exportar tarifas</button>
+    <button class="btn btn-warning btn-sm" onclick="tarifaGenerarAcuerdo()">📄 Generar Acuerdo Word</button>
+    <div style="flex:1;"></div>
+    <button class="btn btn-outline btn-sm" onclick="tarifaLimpiar()" style="color:white;border-color:#E74C3C;">🗑️ Limpiar escala</button>
+  </div>
 
   <div class="grid-2">
+    <!-- CALCULADORA IAP -->
     <div class="card">
-      <div class="card-title">⚙️ Calculadora de Tarifa IAP</div>
+      <div class="card-title">⚙️ Calculadora de Tarifa IAP Individual</div>
       <div class="form-row">
         <div class="form-group"><label>Estrato / Sector</label>
           <select id="tar-estrato" onchange="calcularTarifa()">
@@ -1389,58 +1400,117 @@
             <option value="3" selected>Estrato 3</option><option value="4">Estrato 4</option>
             <option value="5">Estrato 5</option><option value="6">Estrato 6</option>
             <option value="com">Comercial</option><option value="ind">Industrial</option>
-            <option value="of">Oficial</option>
+            <option value="of">Oficial (exento)</option>
           </select>
         </div>
         <div class="form-group"><label>Consumo energía (kWh/mes)</label>
-          <input type="number" id="tar-consumo" value="0" oninput="calcularTarifa()">
+          <input type="number" id="tar-consumo" placeholder="Ej: 180" oninput="calcularTarifa()">
         </div>
         <div class="form-group"><label>Tarifa energía ($/kWh)</label>
-          <input type="number" id="tar-tarifa-energia" value="" oninput="calcularTarifa()">
+          <input type="number" id="tar-tarifa-energia" placeholder="Ej: 890" oninput="calcularTarifa()">
         </div>
-        <div class="form-group"><label>Acuerdo municipal vigente</label>
+        <div class="form-group"><label>Método de cobro</label>
           <select id="tar-metodo" onchange="calcularTarifa()">
-            <option value="consumo">% sobre consumo</option>
-            <option value="fijo">Valor fijo por estrato</option>
+            <option value="consumo">% sobre factura energía</option>
             <option value="kwh">$ por kWh consumido</option>
+            <option value="fijo">Valor fijo mensual</option>
           </select>
         </div>
-        <div class="form-group"><label>Porcentaje / Tarifa base</label>
-          <input type="number" id="tar-pct" value="" step="0.1" oninput="calcularTarifa()">
+        <div class="form-group"><label>Tarifa (% o $/kWh)</label>
+          <input type="number" id="tar-pct" placeholder="Ej: 5.5" step="0.1" oninput="calcularTarifa()">
         </div>
       </div>
       <div class="tarifa-result" id="res-tarifa">
         <div class="concepto">IAP mensual a liquidar</div>
         <div class="monto" id="monto-iap">$0</div>
-        <div class="concepto" style="margin-top:6px;" id="concepto-tarifa">—</div>
+        <div class="concepto" style="margin-top:6px;" id="concepto-tarifa">Ingresa los datos para calcular</div>
+      </div>
+      <div class="btn-group" style="margin-top:10px;">
+        <button class="btn btn-success btn-sm" onclick="tarifaGenerarLiquidacion()">📄 Generar liquidación</button>
+        <button class="btn btn-outline btn-sm" onclick="tarifaAgregarEscala()">➕ Agregar a escala</button>
       </div>
     </div>
 
+    <!-- ESCALA TARIFARIA -->
     <div class="card">
-      <div class="card-title">📋 Escala Tarifaria Referencial</div>
+      <div class="card-title">📋 Escala Tarifaria del Municipio (Acuerdo Municipal)</div>
       <div class="table-wrap">
-        <table>
-          <thead><tr><th>Estrato/Sector</th><th>Tarifa Base</th><th>Tope máx. mensual</th><th>Vigencia</th></tr></thead>
+        <table id="tarifa-table">
+          <thead><tr><th>Estrato/Sector</th><th>Método</th><th>Tarifa</th><th>Tope mensual</th><th>Vigencia</th><th>⚙️</th></tr></thead>
           <tbody id="tarifa-tabla">
-            <tr><td colspan="4" style="text-align:center;padding:20px;color:#aaa;">Sin tarifas configuradas. Use el módulo <strong>Datos & Generar ETR</strong> para definir tarifas.</td></tr>
+            <tr id="tarifa-empty-row"><td colspan="6" style="text-align:center;padding:20px;color:#aaa;">
+              <div style="font-size:1.5rem;margin-bottom:6px;">💰</div>
+              Sin tarifas registradas.<br>Use <strong>📥 Importar CSV</strong> o la calculadora para agregar tarifas.
+            </td></tr>
           </tbody>
         </table>
       </div>
+      <div class="btn-group" style="margin-top:8px;">
+        <button class="btn btn-primary btn-sm" onclick="tarifaAgregarManual()">➕ Agregar manualmente</button>
+        <button class="btn btn-outline btn-sm" onclick="tarifaCargarEjemplo()">📊 Cargar ejemplo</button>
+      </div>
     </div>
   </div>
 
+  <!-- KPIs RECAUDO -->
   <div class="card">
-    <div class="card-title">📊 Proyección de Ingresos IAP</div>
-    <div class="grid-3">
-      <div class="kpi azul"><div class="kpi-value">0</div><div class="kpi-label">Contribuyentes activos</div><div class="kpi-sub">Facturados este mes</div></div>
-      <div class="kpi verde"><div class="kpi-value">$0</div><div class="kpi-label">Recaudo mensual</div><div class="kpi-sub">Proyección junio 2026</div></div>
-      <div class="kpi naranja"><div class="kpi-value">$0</div><div class="kpi-label">Recaudo anual estimado</div><div class="kpi-sub">vs CTMAX $2,340M</div></div>
+    <div class="card-title">📊 Proyección de Recaudo IAP</div>
+    <div class="grid-3" style="margin-bottom:14px;">
+      <div class="kpi azul"><div class="kpi-value" id="tar-total-contrib">0</div><div class="kpi-label">Contribuyentes</div><div class="kpi-sub">Total facturados</div></div>
+      <div class="kpi verde"><div class="kpi-value" id="tar-recaudo-mes">$0</div><div class="kpi-label">Recaudo mensual</div><div class="kpi-sub">Proyección</div></div>
+      <div class="kpi naranja"><div class="kpi-value" id="tar-recaudo-anual">$0</div><div class="kpi-label">Recaudo anual</div><div class="kpi-sub">Proyección</div></div>
     </div>
-    <div class="alert alert-info">ℹ️ Complete el ETR para ver la proyección de recaudo IAP.</div>
+    <div id="tar-art351-result"></div>
+    <div class="form-row" style="margin-top:12px;">
+      <div class="form-group"><label>CTMAX mensual (del ETR) para verificar Art.351</label>
+        <input type="number" id="tar-ctmax-ref" placeholder="Ingresa el CTMAX del ETR" oninput="calcProyeccionRecaudo()">
+      </div>
+      <div class="form-group"><label>N° contribuyentes totales municipio</label>
+        <input type="number" id="tar-n-contrib" placeholder="Ej: 5000" oninput="calcProyeccionRecaudo()">
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL AGREGAR TARIFA MANUAL -->
+  <div id="modal-tarifa" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:9000;align-items:center;justify-content:center;">
+    <div style="background:white;border-radius:12px;width:500px;max-width:96vw;padding:24px;box-shadow:0 20px 60px rgba(0,0,0,0.3);">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+        <h3 style="color:#003366;font-size:1rem;">➕ Agregar Tarifa a la Escala</h3>
+        <button onclick="document.getElementById('modal-tarifa').style.display='none'" style="background:none;border:none;font-size:1.3rem;cursor:pointer;">✕</button>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>Estrato / Sector</label>
+          <select id="mt-sector">
+            <option>Estrato 1</option><option>Estrato 2</option><option>Estrato 3</option>
+            <option>Estrato 4</option><option>Estrato 5</option><option>Estrato 6</option>
+            <option>Comercial</option><option>Industrial</option><option>Oficial</option>
+          </select>
+        </div>
+        <div class="form-group"><label>Método</label>
+          <select id="mt-metodo">
+            <option value="pct">% sobre factura energía</option>
+            <option value="kwh">$ por kWh</option>
+            <option value="fijo">Valor fijo mensual</option>
+          </select>
+        </div>
+        <div class="form-group"><label>Tarifa (%, $/kWh o $ fijo)</label>
+          <input type="number" id="mt-tarifa" placeholder="Ej: 5.5" step="0.01">
+        </div>
+        <div class="form-group"><label>Tope máximo mensual (COP)</label>
+          <input type="number" id="mt-tope" placeholder="Opcional">
+        </div>
+        <div class="form-group"><label>Vigencia</label>
+          <input type="text" id="mt-vigencia" placeholder="Ej: 2024-2027">
+        </div>
+      </div>
+      <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:14px;">
+        <button class="btn btn-outline" onclick="document.getElementById('modal-tarifa').style.display='none'">Cancelar</button>
+        <button class="btn btn-success" onclick="tarifaGuardarManual()">💾 Guardar tarifa</button>
+      </div>
+    </div>
   </div>
 </div>
 
-<!-- ===================== NORMATIVIDAD ===================== -->
 <div id="page-normatividad" class="page">
   <div class="page-header">
     <span class="page-header-icon">📋</span>
@@ -6838,6 +6908,248 @@ document.addEventListener('DOMContentLoaded', function(){
   if(fin) fin.value = hoy;
   const ccFecha = document.getElementById('cc-fecha-mp');
   if(ccFecha) ccFecha.value = hoy;
+});
+
+
+
+// ── MÓDULO TARIFAS — FUNCIONES COMPLETAS ──────────────────────
+let TARIFAS_DB = JSON.parse(localStorage.getItem('TARIFAS_DB')||'[]');
+
+function tarifaRenderTabla() {
+  const tbody = document.getElementById('tarifa-tabla');
+  if(!tbody) return;
+  if(TARIFAS_DB.length === 0) {
+    tbody.innerHTML = '<tr id="tarifa-empty-row"><td colspan="6" style="text-align:center;padding:20px;color:#aaa;"><div style="font-size:1.5rem;margin-bottom:6px;">💰</div>Sin tarifas registradas.<br>Use <strong>📥 Importar CSV</strong> o agrega manualmente.</td></tr>';
+    document.getElementById('tar-total-contrib').textContent = '0';
+    document.getElementById('tar-recaudo-mes').textContent = '$0';
+    document.getElementById('tar-recaudo-anual').textContent = '$0';
+    return;
+  }
+  tbody.innerHTML = TARIFAS_DB.map((t,i) => `<tr>
+    <td><strong>${t.sector}</strong></td>
+    <td>${t.metodo}</td>
+    <td><strong>${t.tarifa}${t.metodo==='pct'?'%':t.metodo==='kwh'?' $/kWh':' COP fijo'}</strong></td>
+    <td>${t.tope ? '$'+parseFloat(t.tope).toLocaleString('es-CO') : '—'}</td>
+    <td>${t.vigencia||'—'}</td>
+    <td>
+      <button class="btn btn-sm btn-outline" onclick="tarifaEliminar(${i})">🗑️</button>
+    </td>
+  </tr>`).join('');
+  calcProyeccionRecaudo();
+}
+
+function tarifaAgregarManual() {
+  document.getElementById('modal-tarifa').style.display = 'flex';
+}
+
+function tarifaGuardarManual() {
+  const sector = document.getElementById('mt-sector')?.value||'';
+  const metodo = document.getElementById('mt-metodo')?.value||'pct';
+  const tarifa = parseFloat(document.getElementById('mt-tarifa')?.value)||0;
+  const tope = document.getElementById('mt-tope')?.value||'';
+  const vigencia = document.getElementById('mt-vigencia')?.value||'';
+  if(!sector || !tarifa) { alert('Ingresa sector y tarifa'); return; }
+  TARIFAS_DB.push({ sector, metodo, tarifa, tope, vigencia });
+  localStorage.setItem('TARIFAS_DB', JSON.stringify(TARIFAS_DB));
+  document.getElementById('modal-tarifa').style.display = 'none';
+  tarifaRenderTabla();
+  alert('✅ Tarifa agregada a la escala.');
+}
+
+function tarifaEliminar(idx) {
+  if(!confirm('¿Eliminar esta tarifa?')) return;
+  TARIFAS_DB.splice(idx,1);
+  localStorage.setItem('TARIFAS_DB', JSON.stringify(TARIFAS_DB));
+  tarifaRenderTabla();
+}
+
+function tarifaAgregarEscala() {
+  const sector = document.getElementById('tar-estrato')?.options[document.getElementById('tar-estrato')?.selectedIndex]?.text || '';
+  const metodo_raw = document.getElementById('tar-metodo')?.value||'consumo';
+  const metodo = metodo_raw === 'consumo' ? 'pct' : metodo_raw;
+  const tarifa = parseFloat(document.getElementById('tar-pct')?.value)||0;
+  const vigencia = new Date().getFullYear()+'-'+(new Date().getFullYear()+3);
+  if(!tarifa) { alert('Primero ingresa la tarifa en la calculadora'); return; }
+  TARIFAS_DB.push({ sector, metodo, tarifa, tope:'', vigencia });
+  localStorage.setItem('TARIFAS_DB', JSON.stringify(TARIFAS_DB));
+  tarifaRenderTabla();
+  alert('✅ Tarifa agregada a la escala del municipio.');
+}
+
+// IMPORTAR CSV TARIFAS
+function tarifaImportarCSV() {
+  const input = document.createElement('input');
+  input.type='file'; input.accept='.csv,.txt';
+  input.onchange = e => {
+    const file = e.target.files[0]; if(!file) return;
+    const reader = new FileReader();
+    reader.onload = ev => {
+      const lineas = ev.target.result.trim().split('\n');
+      let n = 0;
+      for(let i=1; i<lineas.length; i++){
+        const c = lineas[i].split(/[;,]/);
+        if(c.length < 3) continue;
+        const sector = (c[0]||'').trim();
+        const metodo = (c[1]||'pct').trim();
+        const tarifa = parseFloat(c[2])||0;
+        const tope = (c[3]||'').trim();
+        const vigencia = (c[4]||'').trim();
+        if(!sector || !tarifa) continue;
+        TARIFAS_DB.push({ sector, metodo, tarifa, tope, vigencia });
+        n++;
+      }
+      localStorage.setItem('TARIFAS_DB', JSON.stringify(TARIFAS_DB));
+      tarifaRenderTabla();
+      alert('✅ '+n+' tarifas importadas.\n\nFormato: sector;metodo;tarifa;tope_mensual;vigencia');
+    };
+    reader.readAsText(file,'UTF-8');
+  };
+  input.click();
+}
+
+// DESCARGAR PLANTILLA CSV
+function tarifaDescargarPlantilla() {
+  const p = 'sector;metodo(pct/kwh/fijo);tarifa;tope_mensual_COP;vigencia\n' +
+    'Estrato 1;pct;2.5;4200;2024-2027\n' +
+    'Estrato 2;pct;4.0;6800;2024-2027\n' +
+    'Estrato 3;pct;5.5;12500;2024-2027\n' +
+    'Estrato 4;pct;8.0;22000;2024-2027\n' +
+    'Estrato 5;pct;12.0;38000;2024-2027\n' +
+    'Estrato 6;pct;15.0;55000;2024-2027\n' +
+    'Comercial;kwh;80;;2024-2027\n' +
+    'Industrial;kwh;90;;2024-2027\n' +
+    'Oficial;fijo;0;;2024-2027\n';
+  if(window.descargarArchivo) descargarArchivo('\uFEFF'+p, 'Plantilla_Tarifas_IAP.csv', 'text/csv;charset=utf-8');
+  else { const b=new Blob(['\uFEFF'+p],{type:'text/csv'}); const u=URL.createObjectURL(b); const a=document.createElement('a'); a.href=u; a.download='Plantilla_Tarifas_IAP.csv'; document.body.appendChild(a); a.click(); document.body.removeChild(a); }
+}
+
+// EXPORTAR TARIFAS
+function tarifaExportar() {
+  if(TARIFAS_DB.length===0){alert('No hay tarifas registradas.');return;}
+  const muni = document.getElementById('etr-municipio')?.value||'Municipio';
+  const header = '\uFEFF' + 'Estrato/Sector;Metodo;Tarifa;Tope_Mensual;Vigencia\n';
+  const rows = TARIFAS_DB.map(t=>[t.sector,t.metodo,t.tarifa,t.tope||'',t.vigencia||''].join(';')).join('\n');
+  if(window.descargarArchivo) descargarArchivo(header+rows,'Escala_Tarifaria_IAP_'+muni+'.csv','text/csv;charset=utf-8');
+  else { const b=new Blob([header+rows],{type:'text/csv'}); const u=URL.createObjectURL(b); const a=document.createElement('a'); a.href=u; a.download='Escala_Tarifaria_IAP_'+muni+'.csv'; document.body.appendChild(a); a.click(); document.body.removeChild(a); }
+  alert('✅ Escala tarifaria exportada.');
+}
+
+// GENERAR ACUERDO WORD CON TARIFAS
+function tarifaGenerarAcuerdo() {
+  if(TARIFAS_DB.length===0){alert('Primero registra las tarifas del municipio.');return;}
+  const muni = document.getElementById('etr-municipio')?.value||'_________';
+  const fecha = new Date().toLocaleDateString('es-CO',{day:'2-digit',month:'long',year:'numeric'});
+  let txt = 'ACUERDO N. ___ DE '+new Date().getFullYear()+'\n';
+  txt += '"POR EL CUAL SE ESTABLECE EL IMPUESTO DE ALUMBRADO PUBLICO"\n\n';
+  txt += 'EL CONCEJO MUNICIPAL DE '+muni.toUpperCase()+'\n\n';
+  txt += 'ARTÍCULO 5. TARIFAS.\n';
+  txt += 'Conforme al ETR elaborado según Res. CREG 101013/2022 y CE Sent. 22161/2019:\n\n';
+  TARIFAS_DB.forEach(t=>{
+    txt += t.sector+': ';
+    if(t.metodo==='pct') txt += t.tarifa+'% sobre la factura de energía';
+    else if(t.metodo==='kwh') txt += '$'+t.tarifa+' por kWh consumido';
+    else txt += '$'+t.tarifa.toLocaleString('es-CO')+' mensual fijo';
+    if(t.tope) txt += ' (tope: $'+parseFloat(t.tope).toLocaleString('es-CO')+'/mes)';
+    txt += '\n';
+  });
+  txt += '\nVigencia: '+((TARIFAS_DB[0]?.vigencia)||'2024-2027')+'\n';
+  txt += '\nBase: Art.351 Ley 1819/2016 | CE Sent.22161/2019 | Res.CREG 101013/2022\n';
+  txt += '\nFUCDESCOC — NIT 900.517.521-0 | '+fecha;
+  if(window.descargarArchivo) descargarArchivo(txt,'Acuerdo_Tarifas_IAP_'+muni+'.doc','application/msword');
+  else { const b=new Blob([txt],{type:'application/msword'}); const u=URL.createObjectURL(b); const a=document.createElement('a'); a.href=u; a.download='Acuerdo_Tarifas_IAP_'+muni+'.doc'; document.body.appendChild(a); a.click(); document.body.removeChild(a); }
+  alert('✅ Acuerdo Municipal con tarifas descargado.');
+}
+
+// GENERAR LIQUIDACION INDIVIDUAL
+function tarifaGenerarLiquidacion() {
+  const estrato = document.getElementById('tar-estrato')?.options[document.getElementById('tar-estrato')?.selectedIndex]?.text||'';
+  const kwh = parseFloat(document.getElementById('tar-consumo')?.value)||0;
+  const tarifaE = parseFloat(document.getElementById('tar-tarifa-energia')?.value)||0;
+  const pct = parseFloat(document.getElementById('tar-pct')?.value)||0;
+  const iap = parseFloat(document.getElementById('monto-iap')?.textContent?.replace(/[^0-9]/g,'')||'0');
+  const muni = document.getElementById('etr-municipio')?.value||'Municipio';
+  const fecha = new Date().toLocaleDateString('es-CO');
+  const txt = 'LIQUIDACIÓN IAP\nMunicipio: '+muni+'\nFecha: '+fecha+'\n\n'+
+    'Sector: '+estrato+'\nConsumo: '+kwh+' kWh/mes\nTarifa energía: $'+tarifaE+'/kWh\nTarifa IAP: '+pct+'%\n\n'+
+    'IAP A PAGAR: $'+iap.toLocaleString('es-CO')+'\n\n'+
+    'Base: Art.349-353 Ley 1819/2016 | Acuerdo Municipal | CREG 101013/2022';
+  if(window.descargarArchivo) descargarArchivo(txt,'Liquidacion_IAP.doc','application/msword');
+  else { const b=new Blob([txt],{type:'application/msword'}); const u=URL.createObjectURL(b); const a=document.createElement('a'); a.href=u; a.download='Liquidacion_IAP.doc'; document.body.appendChild(a); a.click(); document.body.removeChild(a); }
+}
+
+// CARGAR EJEMPLO
+function tarifaCargarEjemplo() {
+  if(!confirm('¿Cargar escala tarifaria de ejemplo? (reemplazará la actual)')) return;
+  TARIFAS_DB = [
+    {sector:'Estrato 1',metodo:'pct',tarifa:2.5,tope:'4200',vigencia:'2024-2027'},
+    {sector:'Estrato 2',metodo:'pct',tarifa:4.0,tope:'6800',vigencia:'2024-2027'},
+    {sector:'Estrato 3',metodo:'pct',tarifa:5.5,tope:'12500',vigencia:'2024-2027'},
+    {sector:'Estrato 4',metodo:'pct',tarifa:8.0,tope:'22000',vigencia:'2024-2027'},
+    {sector:'Estrato 5',metodo:'pct',tarifa:12.0,tope:'38000',vigencia:'2024-2027'},
+    {sector:'Estrato 6',metodo:'pct',tarifa:15.0,tope:'55000',vigencia:'2024-2027'},
+    {sector:'Comercial',metodo:'kwh',tarifa:80,tope:'',vigencia:'2024-2027'},
+    {sector:'Industrial',metodo:'kwh',tarifa:90,tope:'',vigencia:'2024-2027'},
+    {sector:'Oficial',metodo:'fijo',tarifa:0,tope:'0',vigencia:'2024-2027'},
+  ];
+  localStorage.setItem('TARIFAS_DB', JSON.stringify(TARIFAS_DB));
+  tarifaRenderTabla();
+  alert('✅ Escala de ejemplo cargada. Modifícala según el Acuerdo vigente.');
+}
+
+// LIMPIAR
+function tarifaLimpiar() {
+  if(!confirm('¿Limpiar toda la escala tarifaria?')) return;
+  TARIFAS_DB = [];
+  localStorage.setItem('TARIFAS_DB', JSON.stringify(TARIFAS_DB));
+  tarifaRenderTabla();
+}
+
+// PROYECCIÓN RECAUDO
+function calcProyeccionRecaudo() {
+  const ctmax = parseFloat(document.getElementById('tar-ctmax-ref')?.value)||0;
+  const nContrib = parseFloat(document.getElementById('tar-n-contrib')?.value)||0;
+  if(!nContrib || TARIFAS_DB.length===0) return;
+  
+  // Estimación simple: distribuir contribuyentes por sector
+  const nSectores = TARIFAS_DB.filter(t=>t.tarifa>0).length||1;
+  const contribPorSector = Math.floor(nContrib/nSectores);
+  let recaudoMes = 0;
+  const tarE = parseFloat(document.getElementById('tar-tarifa-energia')?.value)||890;
+  const consumoProm = parseFloat(document.getElementById('tar-consumo')?.value)||180;
+  
+  TARIFAS_DB.forEach(t => {
+    if(t.tarifa <= 0) return;
+    let iap = 0;
+    const factura = consumoProm * tarE;
+    if(t.metodo==='pct') iap = factura*(t.tarifa/100);
+    else if(t.metodo==='kwh') iap = consumoProm*t.tarifa;
+    else iap = parseFloat(t.tarifa)||0;
+    if(t.tope && parseFloat(t.tope)>0 && iap>parseFloat(t.tope)) iap=parseFloat(t.tope);
+    recaudoMes += iap * contribPorSector;
+  });
+  
+  const cumple = ctmax > 0 ? recaudoMes <= ctmax : null;
+  const el1=document.getElementById('tar-total-contrib');
+  const el2=document.getElementById('tar-recaudo-mes');
+  const el3=document.getElementById('tar-recaudo-anual');
+  if(el1) el1.textContent = nContrib.toLocaleString('es-CO');
+  if(el2) el2.textContent = '$'+Math.round(recaudoMes).toLocaleString('es-CO');
+  if(el3) el3.textContent = '$'+Math.round(recaudoMes*12).toLocaleString('es-CO');
+  
+  const resDiv = document.getElementById('tar-art351-result');
+  if(resDiv && ctmax > 0) {
+    resDiv.innerHTML = `<div class="alert ${cumple?'alert-success':'alert-danger'}">
+      ${cumple?'✅':'⚠️'} <strong>Art. 351 Ley 1819/2016:</strong> 
+      Recaudo proyectado ${cumple?'CUMPLE':'EXCEDE'} el límite del CTMAX.<br>
+      Recaudo: $${Math.round(recaudoMes).toLocaleString('es-CO')}/mes vs CTMAX: $${ctmax.toLocaleString('es-CO')}/mes 
+      (${(recaudoMes/ctmax*100).toFixed(1)}%)
+    </div>`;
+  }
+}
+
+// Inicializar tarifas al cargar
+document.addEventListener('DOMContentLoaded', function(){
+  setTimeout(tarifaRenderTabla, 400);
 });
 
 </script>
