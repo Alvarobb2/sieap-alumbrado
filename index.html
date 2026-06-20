@@ -1055,13 +1055,13 @@
       <div class="card-title">⚙️ Parámetros de Diseño</div>
       <div class="form-row">
         <div class="form-group"><label>Tipo de vía</label><select id="sim-via" onchange="calcularSimulacion()"><option value="M1">M1 — Expresa</option><option value="M2">M2 — Arterial</option><option value="M3" selected>M3 — Colectora</option><option value="M4">M4 — Local</option><option value="P">P — Peatonal</option></select></div>
-        <div class="form-group"><label>Ancho de vía (m)</label><input type="number" id="sim-ancho" value="7" min="3" max="30" oninput="calcularSimulacion()"></div>
-        <div class="form-group"><label>Potencia luminaria (W)</label><select id="sim-potencia" onchange="calcularSimulacion()"><option value="70">LED 70W</option><option value="100" selected>LED 100W</option><option value="150">LED 150W</option><option value="250">Sodio 250W</option></select></div>
-        <div class="form-group"><label>Flujo luminoso (lm)</label><input type="number" id="sim-flujo" value="14500" oninput="calcularSimulacion()"></div>
-        <div class="form-group"><label>Altura de montaje (m)</label><input type="number" id="sim-altura" value="9" min="5" max="16" oninput="calcularSimulacion()"></div>
-        <div class="form-group"><label>Espaciado (m)</label><input type="number" id="sim-espaciado" value="32" min="10" max="60" oninput="calcularSimulacion()"></div>
-        <div class="form-group"><label>Factor de mantenimiento</label><input type="number" id="sim-fm" value="0.80" min="0.5" max="1.0" step="0.01" oninput="calcularSimulacion()"></div>
-        <div class="form-group"><label>Factor de utilización</label><input type="number" id="sim-fu" value="0.72" min="0.3" max="1.0" step="0.01" oninput="calcularSimulacion()"></div>
+        <div class="form-group"><label>Ancho de vía (m)</label><input type="number" id="sim-ancho" value="" min="3" max="30" oninput="calcularSimulacion()"></div>
+        <div class="form-group"><label>Potencia luminaria (W)</label><select id="sim-potencia" onchange="calcularSimulacion()"><option value="">LED 70W</option><option value="" selected>LED 100W</option><option value="150">LED 150W</option><option value="">Sodio 250W</option></select></div>
+        <div class="form-group"><label>Flujo luminoso (lm)</label><input type="number" id="sim-flujo" value="" oninput="calcularSimulacion()"></div>
+        <div class="form-group"><label>Altura de montaje (m)</label><input type="number" id="sim-altura" value="" min="5" max="16" oninput="calcularSimulacion()"></div>
+        <div class="form-group"><label>Espaciado (m)</label><input type="number" id="sim-espaciado" value="" min="10" max="60" oninput="calcularSimulacion()"></div>
+        <div class="form-group"><label>Factor de mantenimiento</label><input type="number" id="sim-fm" value="" min="0.5" max="1.0" step="0.01" oninput="calcularSimulacion()"></div>
+        <div class="form-group"><label>Factor de utilización</label><input type="number" id="sim-fu" value="" min="0.3" max="1.0" step="0.01" oninput="calcularSimulacion()"></div>
       </div>
     </div>
     <div class="card">
@@ -1135,9 +1135,9 @@
 
     <div id="tab-csee" class="tab-panel active">
       <div class="form-row">
-        <div class="form-group"><label>Potencia instalada total (kW)</label><input type="number" id="csee-potencia" value="384.2" oninput="calcularCostos()"></div>
-        <div class="form-group"><label>Horas de operación diaria</label><input type="number" id="csee-horas" value="11.5" oninput="calcularCostos()"></div>
-        <div class="form-group"><label>Tarifa energía ($/kWh)</label><input type="number" id="csee-tarifa" value="890" oninput="calcularCostos()"></div>
+        <div class="form-group"><label>Potencia instalada total (kW)</label><input type="number" id="csee-potencia" value="" oninput="calcularCostos()"></div>
+        <div class="form-group"><label>Horas de operación diaria</label><input type="number" id="csee-horas" value="" oninput="calcularCostos()"></div>
+        <div class="form-group"><label>Tarifa energía ($/kWh)</label><input type="number" id="csee-tarifa" value="" oninput="calcularCostos()"></div>
         <div class="form-group"><label>Cargos por uso red ($/kWh)</label><input type="number" id="csee-cargos" value="0" oninput="calcularCostos()"></div>
       </div>
       <div class="tarifa-result" id="res-csee">
@@ -1148,10 +1148,10 @@
 
     <div id="tab-cinv" class="tab-panel">
       <div class="form-row">
-        <div class="form-group"><label>Valor activos inventario (COP)</label><input type="number" id="cinv-valor" value="4820000000" oninput="calcularCostos()"></div>
-        <div class="form-group"><label>Vida útil promedio (años)</label><input type="number" id="cinv-vidautil" value="20" oninput="calcularCostos()"></div>
-        <div class="form-group"><label>Tasa de descuento WACC (%)</label><input type="number" id="cinv-wacc" value="12.34" oninput="calcularCostos()"></div>
-        <div class="form-group"><label>Expansión anual estimada (COP)</label><input type="number" id="cinv-expansion" value="180000000" oninput="calcularCostos()"></div>
+        <div class="form-group"><label>Valor activos inventario (COP)</label><input type="number" id="cinv-valor" value="" oninput="calcularCostos()"></div>
+        <div class="form-group"><label>Vida útil promedio (años)</label><input type="number" id="cinv-vidautil" value="" oninput="calcularCostos()"></div>
+        <div class="form-group"><label>Tasa de descuento WACC (%)</label><input type="number" id="cinv-wacc" value="" oninput="calcularCostos()"></div>
+        <div class="form-group"><label>Expansión anual estimada (COP)</label><input type="number" id="cinv-expansion" value="" oninput="calcularCostos()"></div>
       </div>
       <div class="tarifa-result">
         <div class="concepto">Costo Máximo Inversión SALP (CINV) Anual</div>
@@ -1161,10 +1161,10 @@
 
     <div id="tab-caom" class="tab-panel">
       <div class="form-row">
-        <div class="form-group"><label>Personal operativo (COP/año)</label><input type="number" id="caom-personal" value="420000000" oninput="calcularCostos()"></div>
-        <div class="form-group"><label>Materiales y repuestos (COP/año)</label><input type="number" id="caom-materiales" value="95000000" oninput="calcularCostos()"></div>
-        <div class="form-group"><label>Equipos y maquinaria (COP/año)</label><input type="number" id="caom-equipos" value="65000000" oninput="calcularCostos()"></div>
-        <div class="form-group"><label>Administración (% CAOM)</label><input type="number" id="caom-admin-pct" value="15" oninput="calcularCostos()"></div>
+        <div class="form-group"><label>Personal operativo (COP/año)</label><input type="number" id="caom-personal" value="" oninput="calcularCostos()"></div>
+        <div class="form-group"><label>Materiales y repuestos (COP/año)</label><input type="number" id="caom-materiales" value="" oninput="calcularCostos()"></div>
+        <div class="form-group"><label>Equipos y maquinaria (COP/año)</label><input type="number" id="caom-equipos" value="" oninput="calcularCostos()"></div>
+        <div class="form-group"><label>Administración (% CAOM)</label><input type="number" id="caom-admin-pct" value="" oninput="calcularCostos()"></div>
       </div>
       <div class="tarifa-result">
         <div class="concepto">Costo Máximo AOM (CAOM) Anual</div>
@@ -1174,12 +1174,12 @@
 
     <div id="tab-cotros" class="tab-panel">
       <div class="form-row">
-        <div class="form-group"><label>Interventoría (COP/año)</label><input type="number" id="cot-int" value="36000000" oninput="calcularCostos()"></div>
-        <div class="form-group"><label>Gestión ambiental (COP/año)</label><input type="number" id="cot-amb" value="18000000" oninput="calcularCostos()"></div>
-        <div class="form-group"><label>Sistema gestión activos (COP/año)</label><input type="number" id="cot-sga" value="24000000" oninput="calcularCostos()"></div>
-        <div class="form-group"><label>Pólizas e impuestos (COP/año)</label><input type="number" id="cot-pol" value="12000000" oninput="calcularCostos()"></div>
-        <div class="form-group"><label>Facturación y recaudo (COP/año)</label><input type="number" id="cot-fac" value="48000000" oninput="calcularCostos()"></div>
-        <div class="form-group"><label>Uso activos de terceros (COP/año)</label><input type="number" id="cot-ter" value="85000000" oninput="calcularCostos()"></div>
+        <div class="form-group"><label>Interventoría (COP/año)</label><input type="number" id="cot-int" value="" oninput="calcularCostos()"></div>
+        <div class="form-group"><label>Gestión ambiental (COP/año)</label><input type="number" id="cot-amb" value="" oninput="calcularCostos()"></div>
+        <div class="form-group"><label>Sistema gestión activos (COP/año)</label><input type="number" id="cot-sga" value="" oninput="calcularCostos()"></div>
+        <div class="form-group"><label>Pólizas e impuestos (COP/año)</label><input type="number" id="cot-pol" value="" oninput="calcularCostos()"></div>
+        <div class="form-group"><label>Facturación y recaudo (COP/año)</label><input type="number" id="cot-fac" value="" oninput="calcularCostos()"></div>
+        <div class="form-group"><label>Uso activos de terceros (COP/año)</label><input type="number" id="cot-ter" value="" oninput="calcularCostos()"></div>
       </div>
       <div class="tarifa-result">
         <div class="concepto">Otros Costos (COTROS) Anual</div>
@@ -1390,7 +1390,7 @@
           <input type="number" id="tar-consumo" value="0" oninput="calcularTarifa()">
         </div>
         <div class="form-group"><label>Tarifa energía ($/kWh)</label>
-          <input type="number" id="tar-tarifa-energia" value="890" oninput="calcularTarifa()">
+          <input type="number" id="tar-tarifa-energia" value="" oninput="calcularTarifa()">
         </div>
         <div class="form-group"><label>Acuerdo municipal vigente</label>
           <select id="tar-metodo" onchange="calcularTarifa()">
@@ -1400,7 +1400,7 @@
           </select>
         </div>
         <div class="form-group"><label>Porcentaje / Tarifa base</label>
-          <input type="number" id="tar-pct" value="4.5" step="0.1" oninput="calcularTarifa()">
+          <input type="number" id="tar-pct" value="" step="0.1" oninput="calcularTarifa()">
         </div>
       </div>
       <div class="tarifa-result" id="res-tarifa">
@@ -1698,8 +1698,8 @@
         <div class="form-group"><label>Departamento</label><input type="text" id="st-dpto" value="" placeholder="Departamento"></div>
         <div class="form-group"><label>Período del acuerdo</label><select id="st-periodo"><option>2024-2027</option><option>2025-2028</option><option>2026-2029</option></select></div>
         <div class="form-group"><label>Comercializadora de energía</label><input type="text" id="st-comercializadora" value="ELECTRICARIBE S.A. E.S.P."></div>
-        <div class="form-group"><label>Tarifa energía ($/kWh) — Sector Oficial</label><input type="number" id="st-tarifa-kwh" value="890" oninput="simularTarifas()"></div>
-        <div class="form-group"><label>Horas operación diaria</label><input type="number" id="st-horas-op" value="12" step="0.5" oninput="simularTarifas()"></div>
+        <div class="form-group"><label>Tarifa energía ($/kWh) — Sector Oficial</label><input type="number" id="st-tarifa-kwh" value="" oninput="simularTarifas()"></div>
+        <div class="form-group"><label>Horas operación diaria</label><input type="number" id="st-horas-op" value="" step="0.5" oninput="simularTarifas()"></div>
       </div>
       <div class="card-title" style="margin-top:14px;">📊 Distribución de Contribuyentes</div>
       <div class="form-row">
@@ -1707,11 +1707,11 @@
         <div class="form-group"><label>Estrato 2</label><input type="number" id="cnt-e2" value="0" oninput="simularTarifas()"></div>
         <div class="form-group"><label>Estrato 3</label><input type="number" id="cnt-e3" value="0" oninput="simularTarifas()"></div>
         <div class="form-group"><label>Estrato 4</label><input type="number" id="cnt-e4" value="0" oninput="simularTarifas()"></div>
-        <div class="form-group"><label>Estrato 5</label><input type="number" id="cnt-e5" value="180" oninput="simularTarifas()"></div>
+        <div class="form-group"><label>Estrato 5</label><input type="number" id="cnt-e5" value="" oninput="simularTarifas()"></div>
         <div class="form-group"><label>Estrato 6</label><input type="number" id="cnt-e6" value="0" oninput="simularTarifas()"></div>
         <div class="form-group"><label>Comercial</label><input type="number" id="cnt-com" value="0" oninput="simularTarifas()"></div>
         <div class="form-group"><label>Industrial</label><input type="number" id="cnt-ind" value="0" oninput="simularTarifas()"></div>
-        <div class="form-group"><label>Oficial</label><input type="number" id="cnt-of" value="85" oninput="simularTarifas()"></div>
+        <div class="form-group"><label>Oficial</label><input type="number" id="cnt-of" value="" oninput="simularTarifas()"></div>
       </div>
     </div>
     <!-- ESCENARIOS TARIFARIOS -->
@@ -1721,14 +1721,14 @@
         <table>
           <thead><tr><th>Estrato/Sector</th><th>Escenario A<br><small>Bajo</small></th><th>Escenario B<br><small>Medio</small></th><th>Escenario C<br><small>Alto</small></th><th>Acuerdo<br>Vigente</th><th>Consumo<br>prom. kWh</th></tr></thead>
           <tbody>
-            <tr><td>Estrato 1</td><td><input type="number" id="tA-e1" value="2.0" step="0.1" style="width:60px;padding:3px;border:1px solid #ccc;border-radius:4px;" oninput="simularTarifas()"></td><td><input type="number" id="tB-e1" value="2.5" step="0.1" style="width:60px;padding:3px;border:1px solid #ccc;border-radius:4px;" oninput="simularTarifas()"></td><td><input type="number" id="tC-e1" value="3.5" step="0.1" style="width:60px;padding:3px;border:1px solid #ccc;border-radius:4px;" oninput="simularTarifas()"></td><td><span id="ac-e1" style="font-weight:700;color:#003366;">2.5%</span></td><td><input type="number" id="kw-e1" value="120" style="width:60px;padding:3px;border:1px solid #ccc;border-radius:4px;" oninput="simularTarifas()"></td></tr>
-            <tr><td>Estrato 2</td><td><input type="number" id="tA-e2" value="3.0" step="0.1" style="width:60px;padding:3px;border:1px solid #ccc;border-radius:4px;" oninput="simularTarifas()"></td><td><input type="number" id="tB-e2" value="4.0" step="0.1" style="width:60px;padding:3px;border:1px solid #ccc;border-radius:4px;" oninput="simularTarifas()"></td><td><input type="number" id="tC-e2" value="5.5" step="0.1" style="width:60px;padding:3px;border:1px solid #ccc;border-radius:4px;" oninput="simularTarifas()"></td><td><span id="ac-e2" style="font-weight:700;color:#003366;">4.0%</span></td><td><input type="number" id="kw-e2" value="155" style="width:60px;padding:3px;border:1px solid #ccc;border-radius:4px;" oninput="simularTarifas()"></td></tr>
-            <tr><td>Estrato 3</td><td><input type="number" id="tA-e3" value="4.0" step="0.1" style="width:60px;padding:3px;border:1px solid #ccc;border-radius:4px;" oninput="simularTarifas()"></td><td><input type="number" id="tB-e3" value="5.5" step="0.1" style="width:60px;padding:3px;border:1px solid #ccc;border-radius:4px;" oninput="simularTarifas()"></td><td><input type="number" id="tC-e3" value="8.0" step="0.1" style="width:60px;padding:3px;border:1px solid #ccc;border-radius:4px;" oninput="simularTarifas()"></td><td><span id="ac-e3" style="font-weight:700;color:#003366;">5.5%</span></td><td><input type="number" id="kw-e3" value="185" style="width:60px;padding:3px;border:1px solid #ccc;border-radius:4px;" oninput="simularTarifas()"></td></tr>
-            <tr><td>Estrato 4</td><td><input type="number" id="tA-e4" value="6.0" step="0.1" style="width:60px;padding:3px;border:1px solid #ccc;border-radius:4px;" oninput="simularTarifas()"></td><td><input type="number" id="tB-e4" value="8.0" step="0.1" style="width:60px;padding:3px;border:1px solid #ccc;border-radius:4px;" oninput="simularTarifas()"></td><td><input type="number" id="tC-e4" value="11.0" step="0.1" style="width:60px;padding:3px;border:1px solid #ccc;border-radius:4px;" oninput="simularTarifas()"></td><td><span id="ac-e4" style="font-weight:700;color:#003366;">8.0%</span></td><td><input type="number" id="kw-e4" value="280" style="width:60px;padding:3px;border:1px solid #ccc;border-radius:4px;" oninput="simularTarifas()"></td></tr>
-            <tr><td>Estrato 5</td><td><input type="number" id="tA-e5" value="8.0" step="0.1" style="width:60px;padding:3px;border:1px solid #ccc;border-radius:4px;" oninput="simularTarifas()"></td><td><input type="number" id="tB-e5" value="12.0" step="0.1" style="width:60px;padding:3px;border:1px solid #ccc;border-radius:4px;" oninput="simularTarifas()"></td><td><input type="number" id="tC-e5" value="15.0" step="0.1" style="width:60px;padding:3px;border:1px solid #ccc;border-radius:4px;" oninput="simularTarifas()"></td><td><span id="ac-e5" style="font-weight:700;color:#003366;">12%</span></td><td><input type="number" id="kw-e5" value="480" style="width:60px;padding:3px;border:1px solid #ccc;border-radius:4px;" oninput="simularTarifas()"></td></tr>
-            <tr><td>Estrato 6</td><td><input type="number" id="tA-e6" value="10.0" step="0.1" style="width:60px;padding:3px;border:1px solid #ccc;border-radius:4px;" oninput="simularTarifas()"></td><td><input type="number" id="tB-e6" value="15.0" step="0.1" style="width:60px;padding:3px;border:1px solid #ccc;border-radius:4px;" oninput="simularTarifas()"></td><td><input type="number" id="tC-e6" value="18.0" step="0.1" style="width:60px;padding:3px;border:1px solid #ccc;border-radius:4px;" oninput="simularTarifas()"></td><td><span id="ac-e6" style="font-weight:700;color:#003366;">15%</span></td><td><input type="number" id="kw-e6" value="750" style="width:60px;padding:3px;border:1px solid #ccc;border-radius:4px;" oninput="simularTarifas()"></td></tr>
-            <tr><td>Comercial ($/kWh)</td><td><input type="number" id="tA-com" value="60" style="width:60px;padding:3px;border:1px solid #ccc;border-radius:4px;" oninput="simularTarifas()"></td><td><input type="number" id="tB-com" value="80" style="width:60px;padding:3px;border:1px solid #ccc;border-radius:4px;" oninput="simularTarifas()"></td><td><input type="number" id="tC-com" value="100" style="width:60px;padding:3px;border:1px solid #ccc;border-radius:4px;" oninput="simularTarifas()"></td><td><span style="font-weight:700;color:#003366;">80$/kWh</span></td><td><input type="number" id="kw-com" value="850" style="width:60px;padding:3px;border:1px solid #ccc;border-radius:4px;" oninput="simularTarifas()"></td></tr>
-            <tr><td>Industrial ($/kWh)</td><td><input type="number" id="tA-ind" value="70" style="width:60px;padding:3px;border:1px solid #ccc;border-radius:4px;" oninput="simularTarifas()"></td><td><input type="number" id="tB-ind" value="90" style="width:60px;padding:3px;border:1px solid #ccc;border-radius:4px;" oninput="simularTarifas()"></td><td><input type="number" id="tC-ind" value="120" style="width:60px;padding:3px;border:1px solid #ccc;border-radius:4px;" oninput="simularTarifas()"></td><td><span style="font-weight:700;color:#003366;">90$/kWh</span></td><td><input type="number" id="kw-ind" value="4200" style="width:60px;padding:3px;border:1px solid #ccc;border-radius:4px;" oninput="simularTarifas()"></td></tr>
+            <tr><td>Estrato 1</td><td><input type="number" id="tA-e1" value="" step="0.1" style="width:60px;padding:3px;border:1px solid #ccc;border-radius:4px;" oninput="simularTarifas()"></td><td><input type="number" id="tB-e1" value="" step="0.1" style="width:60px;padding:3px;border:1px solid #ccc;border-radius:4px;" oninput="simularTarifas()"></td><td><input type="number" id="tC-e1" value="" step="0.1" style="width:60px;padding:3px;border:1px solid #ccc;border-radius:4px;" oninput="simularTarifas()"></td><td><span id="ac-e1" style="font-weight:700;color:#003366;">2.5%</span></td><td><input type="number" id="kw-e1" value="" style="width:60px;padding:3px;border:1px solid #ccc;border-radius:4px;" oninput="simularTarifas()"></td></tr>
+            <tr><td>Estrato 2</td><td><input type="number" id="tA-e2" value="" step="0.1" style="width:60px;padding:3px;border:1px solid #ccc;border-radius:4px;" oninput="simularTarifas()"></td><td><input type="number" id="tB-e2" value="" step="0.1" style="width:60px;padding:3px;border:1px solid #ccc;border-radius:4px;" oninput="simularTarifas()"></td><td><input type="number" id="tC-e2" value="" step="0.1" style="width:60px;padding:3px;border:1px solid #ccc;border-radius:4px;" oninput="simularTarifas()"></td><td><span id="ac-e2" style="font-weight:700;color:#003366;">4.0%</span></td><td><input type="number" id="kw-e2" value="" style="width:60px;padding:3px;border:1px solid #ccc;border-radius:4px;" oninput="simularTarifas()"></td></tr>
+            <tr><td>Estrato 3</td><td><input type="number" id="tA-e3" value="" step="0.1" style="width:60px;padding:3px;border:1px solid #ccc;border-radius:4px;" oninput="simularTarifas()"></td><td><input type="number" id="tB-e3" value="" step="0.1" style="width:60px;padding:3px;border:1px solid #ccc;border-radius:4px;" oninput="simularTarifas()"></td><td><input type="number" id="tC-e3" value="" step="0.1" style="width:60px;padding:3px;border:1px solid #ccc;border-radius:4px;" oninput="simularTarifas()"></td><td><span id="ac-e3" style="font-weight:700;color:#003366;">5.5%</span></td><td><input type="number" id="kw-e3" value="" style="width:60px;padding:3px;border:1px solid #ccc;border-radius:4px;" oninput="simularTarifas()"></td></tr>
+            <tr><td>Estrato 4</td><td><input type="number" id="tA-e4" value="" step="0.1" style="width:60px;padding:3px;border:1px solid #ccc;border-radius:4px;" oninput="simularTarifas()"></td><td><input type="number" id="tB-e4" value="" step="0.1" style="width:60px;padding:3px;border:1px solid #ccc;border-radius:4px;" oninput="simularTarifas()"></td><td><input type="number" id="tC-e4" value="" step="0.1" style="width:60px;padding:3px;border:1px solid #ccc;border-radius:4px;" oninput="simularTarifas()"></td><td><span id="ac-e4" style="font-weight:700;color:#003366;">8.0%</span></td><td><input type="number" id="kw-e4" value="" style="width:60px;padding:3px;border:1px solid #ccc;border-radius:4px;" oninput="simularTarifas()"></td></tr>
+            <tr><td>Estrato 5</td><td><input type="number" id="tA-e5" value="" step="0.1" style="width:60px;padding:3px;border:1px solid #ccc;border-radius:4px;" oninput="simularTarifas()"></td><td><input type="number" id="tB-e5" value="" step="0.1" style="width:60px;padding:3px;border:1px solid #ccc;border-radius:4px;" oninput="simularTarifas()"></td><td><input type="number" id="tC-e5" value="" step="0.1" style="width:60px;padding:3px;border:1px solid #ccc;border-radius:4px;" oninput="simularTarifas()"></td><td><span id="ac-e5" style="font-weight:700;color:#003366;">12%</span></td><td><input type="number" id="kw-e5" value="" style="width:60px;padding:3px;border:1px solid #ccc;border-radius:4px;" oninput="simularTarifas()"></td></tr>
+            <tr><td>Estrato 6</td><td><input type="number" id="tA-e6" value="" step="0.1" style="width:60px;padding:3px;border:1px solid #ccc;border-radius:4px;" oninput="simularTarifas()"></td><td><input type="number" id="tB-e6" value="" step="0.1" style="width:60px;padding:3px;border:1px solid #ccc;border-radius:4px;" oninput="simularTarifas()"></td><td><input type="number" id="tC-e6" value="" step="0.1" style="width:60px;padding:3px;border:1px solid #ccc;border-radius:4px;" oninput="simularTarifas()"></td><td><span id="ac-e6" style="font-weight:700;color:#003366;">15%</span></td><td><input type="number" id="kw-e6" value="" style="width:60px;padding:3px;border:1px solid #ccc;border-radius:4px;" oninput="simularTarifas()"></td></tr>
+            <tr><td>Comercial ($/kWh)</td><td><input type="number" id="tA-com" value="" style="width:60px;padding:3px;border:1px solid #ccc;border-radius:4px;" oninput="simularTarifas()"></td><td><input type="number" id="tB-com" value="" style="width:60px;padding:3px;border:1px solid #ccc;border-radius:4px;" oninput="simularTarifas()"></td><td><input type="number" id="tC-com" value="" style="width:60px;padding:3px;border:1px solid #ccc;border-radius:4px;" oninput="simularTarifas()"></td><td><span style="font-weight:700;color:#003366;">80$/kWh</span></td><td><input type="number" id="kw-com" value="" style="width:60px;padding:3px;border:1px solid #ccc;border-radius:4px;" oninput="simularTarifas()"></td></tr>
+            <tr><td>Industrial ($/kWh)</td><td><input type="number" id="tA-ind" value="" style="width:60px;padding:3px;border:1px solid #ccc;border-radius:4px;" oninput="simularTarifas()"></td><td><input type="number" id="tB-ind" value="" style="width:60px;padding:3px;border:1px solid #ccc;border-radius:4px;" oninput="simularTarifas()"></td><td><input type="number" id="tC-ind" value="" style="width:60px;padding:3px;border:1px solid #ccc;border-radius:4px;" oninput="simularTarifas()"></td><td><span style="font-weight:700;color:#003366;">90$/kWh</span></td><td><input type="number" id="kw-ind" value="" style="width:60px;padding:3px;border:1px solid #ccc;border-radius:4px;" oninput="simularTarifas()"></td></tr>
           </tbody>
         </table>
       </div>
@@ -1752,10 +1752,10 @@
   <div class="card">
     <div class="card-title">🔢 CTMAX — Costo Total Máximo de Referencia (Art.351 Ley 1819/2016)</div>
     <div class="form-row">
-      <div class="form-group"><label>CSEE mensual (COP)</label><input type="number" id="ctmax-csee" value="353147039" oninput="simularTarifas()"></div>
-      <div class="form-group"><label>CINV mensual (COP)</label><input type="number" id="ctmax-cinv" value="220122726" oninput="simularTarifas()"></div>
-      <div class="form-group"><label>CAOM mensual (COP)</label><input type="number" id="ctmax-caom" value="555487684" oninput="simularTarifas()"></div>
-      <div class="form-group"><label>COTR mensual (COP)</label><input type="number" id="ctmax-cotr" value="356488744" oninput="simularTarifas()"></div>
+      <div class="form-group"><label>CSEE mensual (COP)</label><input type="number" id="ctmax-csee" value="" oninput="simularTarifas()"></div>
+      <div class="form-group"><label>CINV mensual (COP)</label><input type="number" id="ctmax-cinv" value="" oninput="simularTarifas()"></div>
+      <div class="form-group"><label>CAOM mensual (COP)</label><input type="number" id="ctmax-caom" value="" oninput="simularTarifas()"></div>
+      <div class="form-group"><label>COTR mensual (COP)</label><input type="number" id="ctmax-cotr" value="" oninput="simularTarifas()"></div>
     </div>
     <div id="ctmax-display" class="tarifa-result">
       <div class="concepto">CTMAX Total Mensual — Techo legal IAP</div>
@@ -1782,17 +1782,17 @@
     <div class="card">
       <div class="card-title">⚙️ Parámetros del Modelo Financiero</div>
       <div class="form-row">
-        <div class="form-group"><label>Valor total activos SALP (COP)</label><input type="number" id="fin-activos" value="107186810506" oninput="calcularFinanciero()"></div>
-        <div class="form-group"><label>Tasa de retorno WACC (%) — CREG 007/2020</label><input type="number" id="fin-wacc" value="11.36" step="0.01" oninput="calcularFinanciero()"></div>
-        <div class="form-group"><label>Vida útil reconocida promedio (años)</label><input type="number" id="fin-vida" value="20" oninput="calcularFinanciero()"></div>
-        <div class="form-group"><label>Índice de disponibilidad ID (%)</label><input type="number" id="fin-id" value="99" step="0.1" oninput="calcularFinanciero()"></div>
-        <div class="form-group"><label>Inversión nueva proyecto (COP)</label><input type="number" id="fin-inversion" value="4200000000" oninput="calcularFinanciero()"></div>
-        <div class="form-group"><label>Horizonte de evaluación (años)</label><input type="number" id="fin-horizonte" value="10" oninput="calcularFinanciero()"></div>
-        <div class="form-group"><label>IPP proyectado anual (%)</label><input type="number" id="fin-ipp" value="8.5" step="0.1" oninput="calcularFinanciero()"></div>
-        <div class="form-group"><label>IPC proyectado anual (%)</label><input type="number" id="fin-ipc" value="6.2" step="0.1" oninput="calcularFinanciero()"></div>
-        <div class="form-group"><label>CAOM año 1 (COP)</label><input type="number" id="fin-caom1" value="555487684" oninput="calcularFinanciero()"></div>
-        <div class="form-group"><label>Tasa de crecimiento contribuyentes (%/año)</label><input type="number" id="fin-crec" value="2.5" step="0.1" oninput="calcularFinanciero()"></div>
-        <div class="form-group"><label>Recaudo IAP mensual actual (COP)</label><input type="number" id="fin-recaudo" value="1313544797" oninput="calcularFinanciero()"></div>
+        <div class="form-group"><label>Valor total activos SALP (COP)</label><input type="number" id="fin-activos" value="" oninput="calcularFinanciero()"></div>
+        <div class="form-group"><label>Tasa de retorno WACC (%) — CREG 007/2020</label><input type="number" id="fin-wacc" value="" step="0.01" oninput="calcularFinanciero()"></div>
+        <div class="form-group"><label>Vida útil reconocida promedio (años)</label><input type="number" id="fin-vida" value="" oninput="calcularFinanciero()"></div>
+        <div class="form-group"><label>Índice de disponibilidad ID (%)</label><input type="number" id="fin-id" value="" step="0.1" oninput="calcularFinanciero()"></div>
+        <div class="form-group"><label>Inversión nueva proyecto (COP)</label><input type="number" id="fin-inversion" value="" oninput="calcularFinanciero()"></div>
+        <div class="form-group"><label>Horizonte de evaluación (años)</label><input type="number" id="fin-horizonte" value="" oninput="calcularFinanciero()"></div>
+        <div class="form-group"><label>IPP proyectado anual (%)</label><input type="number" id="fin-ipp" value="" step="0.1" oninput="calcularFinanciero()"></div>
+        <div class="form-group"><label>IPC proyectado anual (%)</label><input type="number" id="fin-ipc" value="" step="0.1" oninput="calcularFinanciero()"></div>
+        <div class="form-group"><label>CAOM año 1 (COP)</label><input type="number" id="fin-caom1" value="" oninput="calcularFinanciero()"></div>
+        <div class="form-group"><label>Tasa de crecimiento contribuyentes (%/año)</label><input type="number" id="fin-crec" value="" step="0.1" oninput="calcularFinanciero()"></div>
+        <div class="form-group"><label>Recaudo IAP mensual actual (COP)</label><input type="number" id="fin-recaudo" value="" oninput="calcularFinanciero()"></div>
         <div class="form-group"><label>FAOM Luminarias 2024 (senda CREG)</label><select id="fin-faom" onchange="calcularFinanciero()">
           <option value="0.086">2024 — 0.086</option>
           <option value="0.080">2025 — 0.080</option>
@@ -1916,13 +1916,13 @@
             <option value="E">E — Espacios especiales</option>
           </select>
         </div>
-        <div class="form-group"><label>Iluminancia media medida (lux)</label><input type="number" id="ret-em" value="35" oninput="verificarRetilap()"></div>
-        <div class="form-group"><label>Uniformidad global Uo (Emin/Eprom)</label><input type="number" id="ret-uo" value="0.42" step="0.01" oninput="verificarRetilap()"></div>
-        <div class="form-group"><label>Uniformidad longitudinal Ul</label><input type="number" id="ret-ul" value="0.65" step="0.01" oninput="verificarRetilap()"></div>
-        <div class="form-group"><label>Índice deslumbramiento TI (%)</label><input type="number" id="ret-ti" value="12" oninput="verificarRetilap()"></div>
-        <div class="form-group"><label>FHS — Flujo Hemisférico Superior (%)</label><input type="number" id="ret-fhs" value="1.5" step="0.1" oninput="verificarRetilap()"></div>
-        <div class="form-group"><label>IRC (Índice de Reproducción Cromática)</label><input type="number" id="ret-irc" value="72" oninput="verificarRetilap()"></div>
-        <div class="form-group"><label>Temperatura de color (K)</label><input type="number" id="ret-cct" value="4000" oninput="verificarRetilap()"></div>
+        <div class="form-group"><label>Iluminancia media medida (lux)</label><input type="number" id="ret-em" value="" oninput="verificarRetilap()"></div>
+        <div class="form-group"><label>Uniformidad global Uo (Emin/Eprom)</label><input type="number" id="ret-uo" value="" step="0.01" oninput="verificarRetilap()"></div>
+        <div class="form-group"><label>Uniformidad longitudinal Ul</label><input type="number" id="ret-ul" value="" step="0.01" oninput="verificarRetilap()"></div>
+        <div class="form-group"><label>Índice deslumbramiento TI (%)</label><input type="number" id="ret-ti" value="" oninput="verificarRetilap()"></div>
+        <div class="form-group"><label>FHS — Flujo Hemisférico Superior (%)</label><input type="number" id="ret-fhs" value="" step="0.1" oninput="verificarRetilap()"></div>
+        <div class="form-group"><label>IRC (Índice de Reproducción Cromática)</label><input type="number" id="ret-irc" value="" oninput="verificarRetilap()"></div>
+        <div class="form-group"><label>Temperatura de color (K)</label><input type="number" id="ret-cct" value="" oninput="verificarRetilap()"></div>
       </div>
       <div id="ret-resultado" style="margin-top:14px;"></div>
     </div>
@@ -1977,10 +1977,10 @@
       <div>
         <div class="card-title" style="font-size:0.88rem;">📋 Calculador de Indicadores §580</div>
         <div class="form-row">
-          <div class="form-group"><label>Horas totales del período</label><input type="number" id="ind-total" value="720" oninput="calcularIndicadores()"></div>
-          <div class="form-group"><label>Horas en servicio</label><input type="number" id="ind-servicio" value="712" oninput="calcularIndicadores()"></div>
-          <div class="form-group"><label>Número de fallas en el período</label><input type="number" id="ind-fallas" value="14" oninput="calcularIndicadores()"></div>
-          <div class="form-group"><label>Total horas indisponibilidad</label><input type="number" id="ind-indisp" value="8" oninput="calcularIndicadores()"></div>
+          <div class="form-group"><label>Horas totales del período</label><input type="number" id="ind-total" value="" oninput="calcularIndicadores()"></div>
+          <div class="form-group"><label>Horas en servicio</label><input type="number" id="ind-servicio" value="" oninput="calcularIndicadores()"></div>
+          <div class="form-group"><label>Número de fallas en el período</label><input type="number" id="ind-fallas" value="" oninput="calcularIndicadores()"></div>
+          <div class="form-group"><label>Total horas indisponibilidad</label><input type="number" id="ind-indisp" value="" oninput="calcularIndicadores()"></div>
         </div>
         <div id="res-indicadores" style="margin-top:10px;"></div>
       </div>
@@ -2005,12 +2005,12 @@
       <div class="card">
         <div class="card-title" style="font-size:0.85rem;">⚡ Calculador de Ahorro Energético por Modernización LED</div>
         <div class="form-row">
-          <div class="form-group"><label>Luminarias a reemplazar</label><input type="number" id="ure-cant" value="500" oninput="calcularURE()"></div>
-          <div class="form-group"><label>Potencia actual (W/luminaria)</label><input type="number" id="ure-pot-actual" value="250" oninput="calcularURE()"></div>
-          <div class="form-group"><label>Potencia LED propuesta (W)</label><input type="number" id="ure-pot-led" value="100" oninput="calcularURE()"></div>
-          <div class="form-group"><label>Horas operación/día</label><input type="number" id="ure-horas" value="12" oninput="calcularURE()"></div>
-          <div class="form-group"><label>Tarifa energía ($/kWh)</label><input type="number" id="ure-tarifa" value="890" oninput="calcularURE()"></div>
-          <div class="form-group"><label>Costo luminaria LED (COP)</label><input type="number" id="ure-costo-led" value="850000" oninput="calcularURE()"></div>
+          <div class="form-group"><label>Luminarias a reemplazar</label><input type="number" id="ure-cant" value="" oninput="calcularURE()"></div>
+          <div class="form-group"><label>Potencia actual (W/luminaria)</label><input type="number" id="ure-pot-actual" value="" oninput="calcularURE()"></div>
+          <div class="form-group"><label>Potencia LED propuesta (W)</label><input type="number" id="ure-pot-led" value="" oninput="calcularURE()"></div>
+          <div class="form-group"><label>Horas operación/día</label><input type="number" id="ure-horas" value="" oninput="calcularURE()"></div>
+          <div class="form-group"><label>Tarifa energía ($/kWh)</label><input type="number" id="ure-tarifa" value="" oninput="calcularURE()"></div>
+          <div class="form-group"><label>Costo luminaria LED (COP)</label><input type="number" id="ure-costo-led" value="" oninput="calcularURE()"></div>
         </div>
         <div id="res-ure" style="margin-top:8px;"></div>
       </div>
@@ -2044,12 +2044,12 @@
       <div class="form-group"><label>Vigencia ETR</label><input type="text" id="etr-vigencia" value="2024-2027"></div>
       <div class="form-group"><label>Secretario/a de Hacienda</label><input type="text" id="etr-secretario" value="Jhimy Segundo López Petro"></div>
       <div class="form-group"><label>Comercializadora energía</label><input type="text" id="etr-comer" value="Empresa de Energía del Caribe"></div>
-      <div class="form-group"><label>Población total (hab.)</label><input type="number" id="etr-pob" value="21840" oninput="calcETR()"></div>
-      <div class="form-group"><label>Km vial total municipio</label><input type="number" id="etr-km-tot" value="248.6" step="0.1" oninput="calcETR()"></div>
-      <div class="form-group"><label>Km vial iluminado</label><input type="number" id="etr-km-ilum" value="234.2" step="0.1" oninput="calcETR()"></div>
-      <div class="form-group"><label>Parques / bienes uso público</label><input type="number" id="etr-parques" value="18" oninput="calcETR()"></div>
-      <div class="form-group"><label>Cobertura energía urbana (%)</label><input type="number" id="etr-cob-urb" value="100" oninput="calcETR()"></div>
-      <div class="form-group"><label>Cobertura energía rural (%)</label><input type="number" id="etr-cob-rur" value="91" oninput="calcETR()"></div>
+      <div class="form-group"><label>Población total (hab.)</label><input type="number" id="etr-pob" value="" oninput="calcETR()"></div>
+      <div class="form-group"><label>Km vial total municipio</label><input type="number" id="etr-km-tot" value="" step="0.1" oninput="calcETR()"></div>
+      <div class="form-group"><label>Km vial iluminado</label><input type="number" id="etr-km-ilum" value="" step="0.1" oninput="calcETR()"></div>
+      <div class="form-group"><label>Parques / bienes uso público</label><input type="number" id="etr-parques" value="" oninput="calcETR()"></div>
+      <div class="form-group"><label>Cobertura energía urbana (%)</label><input type="number" id="etr-cob-urb" value="" oninput="calcETR()"></div>
+      <div class="form-group"><label>Cobertura energía rural (%)</label><input type="number" id="etr-cob-rur" value="" oninput="calcETR()"></div>
     </div>
   </div>
 
@@ -2059,11 +2059,11 @@
         <div class="card-title">💡 Luminarias por tecnología</div>
         <div class="form-row">
           <div class="form-group"><label>LED (und)</label><input type="number" id="i-led" value="0" oninput="calcETR()"></div>
-          <div class="form-group"><label>Potencia prom. LED (W)</label><input type="number" id="i-pled" value="90" oninput="calcETR()"></div>
+          <div class="form-group"><label>Potencia prom. LED (W)</label><input type="number" id="i-pled" value="" oninput="calcETR()"></div>
           <div class="form-group"><label>HID / Sodio AP (und)</label><input type="number" id="i-hid" value="0" oninput="calcETR()"></div>
-          <div class="form-group"><label>Potencia prom. HID (W)</label><input type="number" id="i-phid" value="180" oninput="calcETR()"></div>
+          <div class="form-group"><label>Potencia prom. HID (W)</label><input type="number" id="i-phid" value="" oninput="calcETR()"></div>
           <div class="form-group"><label>Mercurio (und)</label><input type="number" id="i-merc" value="0" oninput="calcETR()"></div>
-          <div class="form-group"><label>Potencia prom. Mercurio (W)</label><input type="number" id="i-pmerc" value="125" oninput="calcETR()"></div>
+          <div class="form-group"><label>Potencia prom. Mercurio (W)</label><input type="number" id="i-pmerc" value="" oninput="calcETR()"></div>
           <div class="form-group"><label>Total luminarias</label><input id="i-total" readonly style="background:#F0F4F8;font-weight:700;"></div>
         </div>
       </div>
@@ -2076,7 +2076,7 @@
           <div class="form-group"><label>Postes concreto</label><input type="number" id="i-pc" value="0" oninput="calcETR()"></div>
           <div class="form-group"><label>Postes metálicos</label><input type="number" id="i-pm" value="0" oninput="calcETR()"></div>
           <div class="form-group"><label>Red aérea excl. (ml)</label><input type="number" id="i-ra" value="0" oninput="calcETR()"></div>
-          <div class="form-group"><label>Transformadores (und)</label><input type="number" id="i-tr" value="18" oninput="calcETR()"></div>
+          <div class="form-group"><label>Transformadores (und)</label><input type="number" id="i-tr" value="" oninput="calcETR()"></div>
           <div class="form-group"><label>Sistemas de medición (und)</label><input type="number" id="i-med" value="0" oninput="calcETR()"></div>
         </div>
       </div>
@@ -2088,11 +2088,11 @@
       <div>
         <div class="card-title">🔢 Parámetros CREG 101013/2022</div>
         <div class="form-row">
-          <div class="form-group"><label>Tarifa energía ($/kWh) Sector Oficial</label><input type="number" id="p-tkwh" value="890" oninput="calcETR()"></div>
-          <div class="form-group"><label>Horas operación/día</label><input type="number" id="p-hd" value="12" step="0.5" oninput="calcETR()"></div>
-          <div class="form-group"><label>WACC — Res. CREG 007/2020 (%)</label><input type="number" id="p-wacc" value="11.36" step="0.01" oninput="calcETR()"></div>
-          <div class="form-group"><label>Vida útil prom. UCAP (años)</label><input type="number" id="p-vu" value="20" oninput="calcETR()"></div>
-          <div class="form-group"><label>ID — Índice Disponibilidad (%)</label><input type="number" id="p-id" value="99" step="0.1" oninput="calcETR()"></div>
+          <div class="form-group"><label>Tarifa energía ($/kWh) Sector Oficial</label><input type="number" id="p-tkwh" value="" oninput="calcETR()"></div>
+          <div class="form-group"><label>Horas operación/día</label><input type="number" id="p-hd" value="" step="0.5" oninput="calcETR()"></div>
+          <div class="form-group"><label>WACC — Res. CREG 007/2020 (%)</label><input type="number" id="p-wacc" value="" step="0.01" oninput="calcETR()"></div>
+          <div class="form-group"><label>Vida útil prom. UCAP (años)</label><input type="number" id="p-vu" value="" oninput="calcETR()"></div>
+          <div class="form-group"><label>ID — Índice Disponibilidad (%)</label><input type="number" id="p-id" value="" step="0.1" oninput="calcETR()"></div>
           <div class="form-group"><label>FAOML senda CREG (año actual)</label>
             <select id="p-faomL" onchange="calcETR()">
               <option value="0.086">2024 → 0.086</option>
@@ -2102,23 +2102,23 @@
               <option value="0.063">2028+ → 0.063</option>
             </select>
           </div>
-          <div class="form-group"><label>FAOMS (activos ≠ lum.) — fijo CREG</label><input value="0.040" readonly style="background:#F0F4F8;"></div>
-          <div class="form-group"><label>IPP anual proyectado (%)</label><input type="number" id="p-ipp" value="8.5" step="0.1" oninput="calcETR()"></div>
-          <div class="form-group"><label>IPC anual proyectado (%)</label><input type="number" id="p-ipc" value="6.2" step="0.1" oninput="calcETR()"></div>
+          <div class="form-group"><label>FAOMS (activos ≠ lum.) — fijo CREG</label><input value="" readonly style="background:#F0F4F8;"></div>
+          <div class="form-group"><label>IPP anual proyectado (%)</label><input type="number" id="p-ipp" value="" step="0.1" oninput="calcETR()"></div>
+          <div class="form-group"><label>IPC anual proyectado (%)</label><input type="number" id="p-ipc" value="" step="0.1" oninput="calcETR()"></div>
         </div>
       </div>
       <div>
         <div class="card-title">💰 Otros Costos COTR (Arts. 37-40)</div>
         <div class="form-row">
-          <div class="form-group"><label>Interventoría mensual (COP) — Art. 37</label><input type="number" id="p-int" value="45000000" oninput="calcETR()"></div>
-          <div class="form-group"><label>SGA ISO 55001 mensual (COP) — Art. 39</label><input type="number" id="p-sga" value="21565299" oninput="calcETR()"></div>
+          <div class="form-group"><label>Interventoría mensual (COP) — Art. 37</label><input type="number" id="p-int" value="" oninput="calcETR()"></div>
+          <div class="form-group"><label>SGA ISO 55001 mensual (COP) — Art. 39</label><input type="number" id="p-sga" value="" oninput="calcETR()"></div>
           <div class="form-group"><label>Ambiental — % del CAOM (Art. 38 máx. 5%)</label><input type="number" id="p-amb" value="5" step="0.5" oninput="calcETR()"></div>
-          <div class="form-group"><label>Pólizas (% sobre CINV+CAOM)</label><input type="number" id="p-pol" value="0.3" step="0.1" oninput="calcETR()"></div>
-          <div class="form-group"><label>Estampillas dept. (% sobre CINV+CAOM)</label><input type="number" id="p-est" value="6.6" step="0.1" oninput="calcETR()"></div>
-          <div class="form-group"><label>ICA municipal (% sobre CINV+CAOM)</label><input type="number" id="p-ica" value="0.7" step="0.1" oninput="calcETR()"></div>
-          <div class="form-group"><label>Expansión anual (COP) — D.943 Art.5</label><input type="number" id="p-exp" value="180000000" oninput="calcETR()"></div>
-          <div class="form-group"><label>Ornamental/Navideña anual — Art.350</label><input type="number" id="p-orn" value="75000000" oninput="calcETR()"></div>
-          <div class="form-group"><label>Crec. contribuyentes/año (%)</label><input type="number" id="p-crec" value="2.5" step="0.1" oninput="calcETR()"></div>
+          <div class="form-group"><label>Pólizas (% sobre CINV+CAOM)</label><input type="number" id="p-pol" value="" step="0.1" oninput="calcETR()"></div>
+          <div class="form-group"><label>Estampillas dept. (% sobre CINV+CAOM)</label><input type="number" id="p-est" value="" step="0.1" oninput="calcETR()"></div>
+          <div class="form-group"><label>ICA municipal (% sobre CINV+CAOM)</label><input type="number" id="p-ica" value="" step="0.1" oninput="calcETR()"></div>
+          <div class="form-group"><label>Expansión anual (COP) — D.943 Art.5</label><input type="number" id="p-exp" value="" oninput="calcETR()"></div>
+          <div class="form-group"><label>Ornamental/Navideña anual — Art.350</label><input type="number" id="p-orn" value="" oninput="calcETR()"></div>
+          <div class="form-group"><label>Crec. contribuyentes/año (%)</label><input type="number" id="p-crec" value="" step="0.1" oninput="calcETR()"></div>
         </div>
       </div>
     </div>
@@ -2131,15 +2131,15 @@
         <div class="table-wrap"><table>
           <thead><tr><th>Sector</th><th>Contribuyentes</th><th>kWh/mes</th><th>Tarifa</th></tr></thead>
           <tbody>
-            <tr><td>Estrato 1</td><td><input type="number" id="cnt-e1" value="820" style="width:75px;" oninput="calcETR()"></td><td><input type="number" id="kwh-e1" value="120" style="width:70px;" oninput="calcETR()"></td><td><input type="number" id="tar-e1" value="2.5" step="0.1" style="width:65px;" oninput="calcETR()">%</td></tr>
-            <tr><td>Estrato 2</td><td><input type="number" id="cnt-e2" value="2140" style="width:75px;" oninput="calcETR()"></td><td><input type="number" id="kwh-e2" value="155" style="width:70px;" oninput="calcETR()"></td><td><input type="number" id="tar-e2" value="4.0" step="0.1" style="width:65px;" oninput="calcETR()">%</td></tr>
-            <tr><td>Estrato 3</td><td><input type="number" id="cnt-e3" value="1850" style="width:75px;" oninput="calcETR()"></td><td><input type="number" id="kwh-e3" value="185" style="width:70px;" oninput="calcETR()"></td><td><input type="number" id="tar-e3" value="5.5" step="0.1" style="width:65px;" oninput="calcETR()">%</td></tr>
-            <tr><td>Estrato 4</td><td><input type="number" id="cnt-e4" value="420" style="width:75px;" oninput="calcETR()"></td><td><input type="number" id="kwh-e4" value="280" style="width:70px;" oninput="calcETR()"></td><td><input type="number" id="tar-e4" value="8.0" step="0.1" style="width:65px;" oninput="calcETR()">%</td></tr>
-            <tr><td>Estrato 5</td><td><input type="number" id="cnt-e5" value="180" style="width:75px;" oninput="calcETR()"></td><td><input type="number" id="kwh-e5" value="480" style="width:70px;" oninput="calcETR()"></td><td><input type="number" id="tar-e5" value="12.0" step="0.1" style="width:65px;" oninput="calcETR()">%</td></tr>
-            <tr><td>Estrato 6</td><td><input type="number" id="cnt-e6" value="45" style="width:75px;" oninput="calcETR()"></td><td><input type="number" id="kwh-e6" value="750" style="width:70px;" oninput="calcETR()"></td><td><input type="number" id="tar-e6" value="15.0" step="0.1" style="width:65px;" oninput="calcETR()">%</td></tr>
-            <tr><td>Comercial</td><td><input type="number" id="cnt-com" value="680" style="width:75px;" oninput="calcETR()"></td><td><input type="number" id="kwh-com" value="850" style="width:70px;" oninput="calcETR()"></td><td><input type="number" id="tar-com" value="80" style="width:65px;" oninput="calcETR()">$/kWh</td></tr>
-            <tr><td>Industrial</td><td><input type="number" id="cnt-ind" value="120" style="width:75px;" oninput="calcETR()"></td><td><input type="number" id="kwh-ind" value="4200" style="width:70px;" oninput="calcETR()"></td><td><input type="number" id="tar-ind" value="90" style="width:65px;" oninput="calcETR()">$/kWh</td></tr>
-            <tr><td>Oficial</td><td><input type="number" id="cnt-of" value="85" style="width:75px;" oninput="calcETR()"></td><td>—</td><td style="color:#888;">Exento</td></tr>
+            <tr><td>Estrato 1</td><td><input type="number" id="cnt-e1" value="" style="width:75px;" oninput="calcETR()"></td><td><input type="number" id="kwh-e1" value="" style="width:70px;" oninput="calcETR()"></td><td><input type="number" id="tar-e1" value="" step="0.1" style="width:65px;" oninput="calcETR()">%</td></tr>
+            <tr><td>Estrato 2</td><td><input type="number" id="cnt-e2" value="" style="width:75px;" oninput="calcETR()"></td><td><input type="number" id="kwh-e2" value="" style="width:70px;" oninput="calcETR()"></td><td><input type="number" id="tar-e2" value="" step="0.1" style="width:65px;" oninput="calcETR()">%</td></tr>
+            <tr><td>Estrato 3</td><td><input type="number" id="cnt-e3" value="" style="width:75px;" oninput="calcETR()"></td><td><input type="number" id="kwh-e3" value="" style="width:70px;" oninput="calcETR()"></td><td><input type="number" id="tar-e3" value="" step="0.1" style="width:65px;" oninput="calcETR()">%</td></tr>
+            <tr><td>Estrato 4</td><td><input type="number" id="cnt-e4" value="" style="width:75px;" oninput="calcETR()"></td><td><input type="number" id="kwh-e4" value="" style="width:70px;" oninput="calcETR()"></td><td><input type="number" id="tar-e4" value="" step="0.1" style="width:65px;" oninput="calcETR()">%</td></tr>
+            <tr><td>Estrato 5</td><td><input type="number" id="cnt-e5" value="" style="width:75px;" oninput="calcETR()"></td><td><input type="number" id="kwh-e5" value="" style="width:70px;" oninput="calcETR()"></td><td><input type="number" id="tar-e5" value="" step="0.1" style="width:65px;" oninput="calcETR()">%</td></tr>
+            <tr><td>Estrato 6</td><td><input type="number" id="cnt-e6" value="" style="width:75px;" oninput="calcETR()"></td><td><input type="number" id="kwh-e6" value="" style="width:70px;" oninput="calcETR()"></td><td><input type="number" id="tar-e6" value="" step="0.1" style="width:65px;" oninput="calcETR()">%</td></tr>
+            <tr><td>Comercial</td><td><input type="number" id="cnt-com" value="" style="width:75px;" oninput="calcETR()"></td><td><input type="number" id="kwh-com" value="" style="width:70px;" oninput="calcETR()"></td><td><input type="number" id="tar-com" value="" style="width:65px;" oninput="calcETR()">$/kWh</td></tr>
+            <tr><td>Industrial</td><td><input type="number" id="cnt-ind" value="" style="width:75px;" oninput="calcETR()"></td><td><input type="number" id="kwh-ind" value="" style="width:70px;" oninput="calcETR()"></td><td><input type="number" id="tar-ind" value="" style="width:65px;" oninput="calcETR()">$/kWh</td></tr>
+            <tr><td>Oficial</td><td><input type="number" id="cnt-of" value="" style="width:75px;" oninput="calcETR()"></td><td>—</td><td style="color:#888;">Exento</td></tr>
           </tbody>
         </table></div>
       </div>
@@ -2699,9 +2699,9 @@
         <div class="form-group"><label>Total luminarias SALP</label><input type="number" id="mn-luminarias" value="0" oninput="muni_calc()"></div>
         <div class="form-group"><label>CR Total SALP (COP)</label><input type="number" id="mn-cr" value="0" oninput="muni_calc()"></div>
         <div class="form-group"><label>CSEE mensual (COP)</label><input type="number" id="mn-csee" value="0" oninput="muni_calc()"></div>
-        <div class="form-group"><label>Tarifa energía ($/kWh)</label><input type="number" id="mn-tarifa" value="890" oninput="muni_calc()"></div>
+        <div class="form-group"><label>Tarifa energía ($/kWh)</label><input type="number" id="mn-tarifa" value="" oninput="muni_calc()"></div>
         <div class="form-group"><label>Recaudo IAP mensual (COP)</label><input type="number" id="mn-recaudo" value="0" oninput="muni_calc()"></div>
-        <div class="form-group"><label>ID Disponibilidad (%)</label><input type="number" id="mn-id" value="99" oninput="muni_calc()"></div>
+        <div class="form-group"><label>ID Disponibilidad (%)</label><input type="number" id="mn-id" value="" oninput="muni_calc()"></div>
       </div>
       <div id="muni-calc-result" style="margin:12px 0;"></div>
       <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:14px;">
@@ -2728,18 +2728,18 @@
     <div class="card">
       <div class="card-title">⚙️ Dimensionamiento Sistema FV</div>
       <div class="form-row">
-        <div class="form-group"><label>Luminarias a alimentar (und)</label><input type="number" id="fv-lum" value="50" oninput="calcFV()"></div>
-        <div class="form-group"><label>Potencia por luminaria (W)</label><input type="number" id="fv-pot" value="100" oninput="calcFV()"></div>
-        <div class="form-group"><label>Horas operación nocturna</label><input type="number" id="fv-horas" value="12" oninput="calcFV()"></div>
+        <div class="form-group"><label>Luminarias a alimentar (und)</label><input type="number" id="fv-lum" value="" oninput="calcFV()"></div>
+        <div class="form-group"><label>Potencia por luminaria (W)</label><input type="number" id="fv-pot" value="" oninput="calcFV()"></div>
+        <div class="form-group"><label>Horas operación nocturna</label><input type="number" id="fv-horas" value="" oninput="calcFV()"></div>
         <div class="form-group"><label>Días de autonomía (días nublados)</label><input type="number" id="fv-dias-aut" value="2" oninput="calcFV()"></div>
-        <div class="form-group"><label>Horas Sol Pico — HSP (Sucre/Córdoba)</label><input type="number" id="fv-hsp" value="5.2" step="0.1" oninput="calcFV()"></div>
-        <div class="form-group"><label>Eficiencia sistema (%)</label><input type="number" id="fv-efic" value="85" oninput="calcFV()"></div>
+        <div class="form-group"><label>Horas Sol Pico — HSP (Sucre/Córdoba)</label><input type="number" id="fv-hsp" value="" step="0.1" oninput="calcFV()"></div>
+        <div class="form-group"><label>Eficiencia sistema (%)</label><input type="number" id="fv-efic" value="" oninput="calcFV()"></div>
         <div class="form-group"><label>Tensión batería (V)</label><select id="fv-volt" onchange="calcFV()"><option value="12">12V</option><option value="24" selected>24V</option><option value="48">48V</option></select></div>
-        <div class="form-group"><label>Profundidad descarga batería (%)</label><input type="number" id="fv-dod" value="70" oninput="calcFV()"></div>
-        <div class="form-group"><label>Potencia panel FV (Wp)</label><input type="number" id="fv-panel-wp" value="400" oninput="calcFV()"></div>
-        <div class="form-group"><label>Capacidad batería (Ah)</label><input type="number" id="fv-bat-ah" value="200" oninput="calcFV()"></div>
-        <div class="form-group"><label>Precio panel (COP)</label><input type="number" id="fv-precio-panel" value="1200000" oninput="calcFV()"></div>
-        <div class="form-group"><label>Precio batería (COP)</label><input type="number" id="fv-precio-bat" value="800000" oninput="calcFV()"></div>
+        <div class="form-group"><label>Profundidad descarga batería (%)</label><input type="number" id="fv-dod" value="" oninput="calcFV()"></div>
+        <div class="form-group"><label>Potencia panel FV (Wp)</label><input type="number" id="fv-panel-wp" value="" oninput="calcFV()"></div>
+        <div class="form-group"><label>Capacidad batería (Ah)</label><input type="number" id="fv-bat-ah" value="" oninput="calcFV()"></div>
+        <div class="form-group"><label>Precio panel (COP)</label><input type="number" id="fv-precio-panel" value="" oninput="calcFV()"></div>
+        <div class="form-group"><label>Precio batería (COP)</label><input type="number" id="fv-precio-bat" value="" oninput="calcFV()"></div>
       </div>
     </div>
     <div class="card">
@@ -2754,11 +2754,11 @@
     <div class="card">
       <div class="card-title">💰 Análisis Financiero FV — Ley 1715/2014</div>
       <div class="form-row">
-        <div class="form-group"><label>Tarifa energía evitada ($/kWh)</label><input type="number" id="fv-tarifa-ev" value="890" oninput="calcFV()"></div>
-        <div class="form-group"><label>Vida útil paneles (años)</label><input type="number" id="fv-vida" value="25" oninput="calcFV()"></div>
-        <div class="form-group"><label>O&M anual (% inversión)</label><input type="number" id="fv-om" value="1.5" step="0.1" oninput="calcFV()"></div>
-        <div class="form-group"><label>Descuento IVA Ley 1715 (%)</label><input value="19" readonly style="background:#D4EDDA;font-weight:700;"></div>
-        <div class="form-group"><label>Deducción renta Ley 1715 (%)</label><input value="50" readonly style="background:#D4EDDA;font-weight:700;"></div>
+        <div class="form-group"><label>Tarifa energía evitada ($/kWh)</label><input type="number" id="fv-tarifa-ev" value="" oninput="calcFV()"></div>
+        <div class="form-group"><label>Vida útil paneles (años)</label><input type="number" id="fv-vida" value="" oninput="calcFV()"></div>
+        <div class="form-group"><label>O&M anual (% inversión)</label><input type="number" id="fv-om" value="" step="0.1" oninput="calcFV()"></div>
+        <div class="form-group"><label>Descuento IVA Ley 1715 (%)</label><input value="" readonly style="background:#D4EDDA;font-weight:700;"></div>
+        <div class="form-group"><label>Deducción renta Ley 1715 (%)</label><input value="" readonly style="background:#D4EDDA;font-weight:700;"></div>
         <div class="form-group"><label>Exención arancel Ley 1715</label><input value="Sí — importación equipos" readonly style="background:#D4EDDA;"></div>
       </div>
       <div id="fv-financiero" style="margin-top:10px;"></div>
@@ -2903,9 +2903,9 @@
                 <option value="fijo">Valor fijo mensual</option>
               </select>
             </div>
-            <div class="form-group"><label>Consumo mensual (kWh)</label><input type="number" id="trib-kwh" value="180" oninput="calcTribBase()"></div>
-            <div class="form-group"><label>Tarifa energía ($/kWh)</label><input type="number" id="trib-tarifa-e" value="890" oninput="calcTribBase()"></div>
-            <div class="form-group"><label>Porcentaje / Tarifa IAP</label><input type="number" id="trib-pct" value="5.5" step="0.1" oninput="calcTribBase()"></div>
+            <div class="form-group"><label>Consumo mensual (kWh)</label><input type="number" id="trib-kwh" value="" oninput="calcTribBase()"></div>
+            <div class="form-group"><label>Tarifa energía ($/kWh)</label><input type="number" id="trib-tarifa-e" value="" oninput="calcTribBase()"></div>
+            <div class="form-group"><label>Porcentaje / Tarifa IAP</label><input type="number" id="trib-pct" value="" step="0.1" oninput="calcTribBase()"></div>
           </div>
           <div id="trib-base-result" style="margin-top:10px;"></div>
         </div>
