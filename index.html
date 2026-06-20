@@ -55,7 +55,95 @@ body{margin:0;font-family:'Segoe UI',Arial,sans-serif;background:#F0F4F8}
 #page-dashboard{display:block!important}
 .sk{background:linear-gradient(90deg,#e8edf2 25%,#d0d8e4 50%,#e8edf2 75%);background-size:200% 100%;animation:sk 1.2s infinite;border-radius:8px;height:80px;margin-bottom:12px}
 @keyframes sk{0%{background-position:200% 0}100%{background-position:-200% 0}}
-</style></head>
+</style><script>
+function showPage(id){
+  var pages=document.querySelectorAll('.page');
+  for(var i=0;i<pages.length;i++){pages[i].style.display='none';pages[i].classList.remove('active');}
+  var t=document.getElementById('page-'+id);
+  if(t){t.style.display='block';t.classList.add('active');}
+  var items=document.querySelectorAll('.sidebar-item');
+  for(var j=0;j<items.length;j++){
+    items[j].classList.remove('active');
+    var oc=items[j].getAttribute('onclick')||'';
+    if(oc.indexOf("'"+id+"'")!==-1){items[j].classList.add('active');}
+  }
+  if(id==='geo-pro'&&typeof geoInitMap==='function'){setTimeout(geoInitMap,150);}
+  window.scrollTo(0,0);
+}
+
+function muni_nuevo() {
+  var modal = document.getElementById('muni-modal');
+  if(modal) {
+    // Limpiar campos
+    ['mn-nombre','mn-dpto','mn-nit','mn-dane','mn-secretario','mn-alcalde','mn-comer'].forEach(function(id){
+      var e=document.getElementById(id); if(e) e.value='';
+    });
+    ['mn-luminarias','mn-cr','mn-csee','mn-recaudo','mn-id'].forEach(function(id){
+      var e=document.getElementById(id); if(e) e.value='0';
+    });
+    var v=document.getElementById('mn-vigencia'); if(v) v.value='2024-2027';
+    modal.style.display='flex';
+  }
+}
+
+function muni_guardar() {
+  var nombre = document.getElementById('mn-nombre')?.value?.trim();
+  if(!nombre){ showToast('⚠️ Ingresa el nombre del municipio','error'); return; }
+  var dpto = document.getElementById('mn-dpto')?.value||'';
+  var nit = document.getElementById('mn-nit')?.value||'';
+  var dane = document.getElementById('mn-dane')?.value||'';
+  var sec = document.getElementById('mn-secretario')?.value||'';
+  var alc = document.getElementById('mn-alcalde')?.value||'';
+  var vig = document.getElementById('mn-vigencia')?.value||'2024-2027';
+  var com = document.getElementById('mn-comer')?.value||'';
+  var lums = parseFloat(document.getElementById('mn-luminarias')?.value)||0;
+  var cr = parseFloat(document.getElementById('mn-cr')?.value)||0;
+  var csee = parseFloat(document.getElementById('mn-csee')?.value)||0;
+  var recaudo = parseFloat(document.getElementById('mn-recaudo')?.value)||0;
+  var idP = parseFloat(document.getElementById('mn-id')?.value||99)/100;
+
+  var wacc=0.1136, vida=20;
+  var caanA = cr>0 ? cr*(wacc/(1-Math.pow(1+wacc,-vida))) : 0;
+  var cinvA = caanA*idP;
+  var caomA = cr*0.074*idP;
+  var cotrA = (cinvA+caomA)*0.08;
+  var ctmaxA = cseeA*12 + cinvA + caomA + cotrA;
+  var cseeA_cal = csee;
+  ctmaxA = cseeA_cal*12 + cinvA + caomA + cotrA;
+  var cumple = (recaudo*12) <= ctmaxA;
+
+  var id_edit = 'M-' + Date.now();
+  if(!window.MUNICIPIOS_DB) window.MUNICIPIOS_DB = {};
+  window.MUNICIPIOS_DB[id_edit] = {
+    id:id_edit, nombre:nombre, dpto:dpto, nit:nit, dane:dane,
+    secretario:sec, alcalde:alc, vigencia:vig, comercializadora:com,
+    luminarias:lums, cr_total:cr, csee_mes:csee, recaudo_mes:recaudo,
+    id_pct:idP, ctmax_anual:ctmaxA, recaudo_anual:recaudo*12, cumple_art351:cumple,
+    ts:new Date().toISOString()
+  };
+  try{ localStorage.setItem('MUNICIPIOS_DB', JSON.stringify(window.MUNICIPIOS_DB)); }catch(e){}
+
+  document.getElementById('muni-modal').style.display='none';
+  if(typeof muni_renderLista==='function') muni_renderLista();
+  if(typeof muni_renderComparativo==='function') muni_renderComparativo();
+  showToast('✅ Municipio "'+nombre+'" registrado exitosamente');
+
+  // Precargar en ETR
+  var eEl = document.getElementById('etr-municipio'); if(eEl) eEl.value=nombre;
+  var dEl = document.getElementById('etr-dpto'); if(dEl) dEl.value=dpto;
+}
+
+function showTab(btn,pid){
+  var p=btn.closest('.card')||btn.closest('.page');
+  if(!p)return;
+  p.querySelectorAll('.tab-btn').forEach(function(b){b.classList.remove('active');});
+  p.querySelectorAll('.tab-panel').forEach(function(tp){tp.style.display='none';tp.classList.remove('active');});
+  btn.classList.add('active');
+  var panel=document.getElementById(pid);
+  if(panel){panel.style.display='block';panel.classList.add('active');}
+}
+</script>
+</head>
 <body>
 
 <div class="topbar">
@@ -74,10 +162,16 @@ body{margin:0;font-family:'Segoe UI',Arial,sans-serif;background:#F0F4F8}
 <div class="layout">
 <nav class="sidebar">
 <div class="sidebar-section">Principal</div>
+  <a class="sidebar-item" onclick="showPage('ayuda')" href="#">
+    <span class="sidebar-icon">❓</span> Ayuda / Guía de uso
+  </a>
 <a class="sidebar-item active" onclick="showPage('dashboard')" href="#" class="sidebar-item active" style="background:rgba(51,153,204,.18);color:#fff;border-left:3px solid #3399CC;font-weight:600;">
 <span class="sidebar-icon">🏠</span> Dashboard
 </a>
-<div class="sidebar-section">Estudio Técnico</div>
+<a class="sidebar-item" onclick="showPage('ayuda')" href="#">
+    <span class="sidebar-icon">❓</span> Centro de Ayuda
+  </a>
+  <div class="sidebar-section">Estudio Técnico</div>
 <a class="sidebar-item" onclick="showPage('cobertura')" href="#">
 <span class="sidebar-icon">🗺️</span> Cobertura & Diagnóstico
 </a>
@@ -142,7 +236,7 @@ body{margin:0;font-family:'Segoe UI',Arial,sans-serif;background:#F0F4F8}
 </a>
 </nav>
 <main class="main">
-<div id="page-dashboard" class="page active" style="display:block" style="display:block">
+<div id="page-dashboard" class="page active" style="display:block!important" style="display:block" style="display:block">
 <div class="page-header">
 <span class="page-header-icon">🏠</span>
 <div>
@@ -2580,6 +2674,433 @@ Las tarifas del presente Acuerdo están soportadas en el Estudio Técnico de Ref
 </div>
 </div>
 </div>
+
+<div id="page-ayuda" class="page" style="display:none">
+  <div class="page-header" style="background:linear-gradient(135deg,#1a3a1a,#2E8B34);">
+    <span class="page-header-icon">❓</span>
+    <div>
+      <h1>Guía de Uso — SIEAP</h1>
+      <p>Manual paso a paso · FUCDESCOC · NIT 900.517.521-0</p>
+    </div>
+  </div>
+
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title">🚀 Primeros Pasos — En este orden</div>
+      <div style="display:flex;flex-direction:column;gap:12px;">
+        <div style="padding:14px;background:#EBF2FA;border-radius:10px;border-left:4px solid #0055A5;">
+          <div style="font-weight:800;color:#003366;font-size:0.95rem;margin-bottom:6px;">PASO 1 — Registrar el Municipio</div>
+          <div style="font-size:0.83rem;color:#333;margin-bottom:8px;">Ve a <strong>Gestión Multi-Municipio</strong> → Clic en <strong>"+ Nuevo"</strong> → Llena los datos → <strong>"Guardar Municipio"</strong></div>
+          <button class="btn btn-primary btn-sm" onclick="showPage('municipios')">→ Ir a Gestión Multi-Municipio</button>
+        </div>
+        <div style="padding:14px;background:#EBF2FA;border-radius:10px;border-left:4px solid #2E8B34;">
+          <div style="font-weight:800;color:#003366;font-size:0.95rem;margin-bottom:6px;">PASO 2 — Ingresar Inventario SALP</div>
+          <div style="font-size:0.83rem;color:#333;margin-bottom:8px;">Ve a <strong>Datos & Generar ETR</strong> → Pestaña <strong>"Inventario SALP"</strong> → Ingresa CR luminarias y activos → Pestaña <strong>"Parámetros CREG"</strong> → Clic <strong>"Calcular ETR"</strong></div>
+          <button class="btn btn-success btn-sm" onclick="showPage('datos-etr')">→ Ir a Datos & ETR</button>
+        </div>
+        <div style="padding:14px;background:#EBF2FA;border-radius:10px;border-left:4px solid #E87722;">
+          <div style="font-weight:800;color:#003366;font-size:0.95rem;margin-bottom:6px;">PASO 3 — Registrar Luminarias</div>
+          <div style="font-size:0.83rem;color:#333;margin-bottom:8px;">Ve a <strong>Inventario de Luminarias</strong> → Pestaña <strong>"➕ Registrar"</strong> → Llena código, tecnología, potencia → Clic <strong>"💾 Registrar Luminaria"</strong></div>
+          <button class="btn btn-warning btn-sm" onclick="showPage('luminarias')">→ Ir a Inventario</button>
+        </div>
+        <div style="padding:14px;background:#EBF2FA;border-radius:10px;border-left:4px solid #5a2d8a;">
+          <div style="font-weight:800;color:#003366;font-size:0.95rem;margin-bottom:6px;">PASO 4 — Georreferenciar</div>
+          <div style="font-size:0.83rem;color:#333;margin-bottom:8px;">Ve a <strong>SIAP Georreferenciación</strong> → Clic <strong>"📍 Agregar luminaria"</strong> → Haz clic en el mapa → Llena la ficha técnica → <strong>"💾 Guardar en SIAP"</strong></div>
+          <button class="btn btn-primary btn-sm" onclick="showPage('geo-pro')">→ Ir a SIAP Geo</button>
+        </div>
+        <div style="padding:14px;background:#EBF2FA;border-radius:10px;border-left:4px solid #CC2200;">
+          <div style="font-weight:800;color:#003366;font-size:0.95rem;margin-bottom:6px;">PASO 5 — Generar ETR Word</div>
+          <div style="font-size:0.83rem;color:#333;margin-bottom:8px;">Ve a <strong>Datos & Generar ETR</strong> → Pestaña <strong>"📋 Resultados ETR"</strong> → Clic <strong>"📄 Generar ETR Word"</strong></div>
+          <button class="btn btn-danger btn-sm" onclick="showPage('datos-etr')">→ Ir a Generar ETR</button>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <div class="card">
+        <div class="card-title">📋 Módulos disponibles</div>
+        <div style="display:flex;flex-direction:column;gap:6px;font-size:0.82rem;">
+          <div style="padding:8px 12px;background:#F0F4F8;border-radius:6px;display:flex;justify-content:space-between;align-items:center;">
+            <span>🏠 Dashboard</span><button class="btn btn-sm btn-outline" onclick="showPage('dashboard')">Abrir</button>
+          </div>
+          <div style="padding:8px 12px;background:#F0F4F8;border-radius:6px;display:flex;justify-content:space-between;align-items:center;">
+            <span>🗺️ Cobertura & Diagnóstico</span><button class="btn btn-sm btn-outline" onclick="showPage('cobertura')">Abrir</button>
+          </div>
+          <div style="padding:8px 12px;background:#F0F4F8;border-radius:6px;display:flex;justify-content:space-between;align-items:center;">
+            <span>📍 SIAP Georreferenciación</span><button class="btn btn-sm btn-outline" onclick="showPage('geo-pro')">Abrir</button>
+          </div>
+          <div style="padding:8px 12px;background:#F0F4F8;border-radius:6px;display:flex;justify-content:space-between;align-items:center;">
+            <span>💡 Inventario de Luminarias</span><button class="btn btn-sm btn-outline" onclick="showPage('luminarias')">Abrir</button>
+          </div>
+          <div style="padding:8px 12px;background:#F0F4F8;border-radius:6px;display:flex;justify-content:space-between;align-items:center;">
+            <span>🔬 Simulación Fotométrica</span><button class="btn btn-sm btn-outline" onclick="showPage('simulacion')">Abrir</button>
+          </div>
+          <div style="padding:8px 12px;background:#F0F4F8;border-radius:6px;display:flex;justify-content:space-between;align-items:center;">
+            <span>📊 Costos ETR (CREG)</span><button class="btn btn-sm btn-outline" onclick="showPage('costos')">Abrir</button>
+          </div>
+          <div style="padding:8px 12px;background:#F0F4F8;border-radius:6px;display:flex;justify-content:space-between;align-items:center;">
+            <span>🔧 Mantenimiento</span><button class="btn btn-sm btn-outline" onclick="showPage('mantenimiento')">Abrir</button>
+          </div>
+          <div style="padding:8px 12px;background:#F0F4F8;border-radius:6px;display:flex;justify-content:space-between;align-items:center;">
+            <span>🚨 Incidencias</span><button class="btn btn-sm btn-outline" onclick="showPage('incidencias')">Abrir</button>
+          </div>
+          <div style="padding:8px 12px;background:#F0F4F8;border-radius:6px;display:flex;justify-content:space-between;align-items:center;">
+            <span>💰 Tarifas IAP</span><button class="btn btn-sm btn-outline" onclick="showPage('tarifas')">Abrir</button>
+          </div>
+          <div style="padding:8px 12px;background:#F0F4F8;border-radius:6px;display:flex;justify-content:space-between;align-items:center;">
+            <span>📋 Normatividad</span><button class="btn btn-sm btn-outline" onclick="showPage('normatividad')">Abrir</button>
+          </div>
+          <div style="padding:8px 12px;background:#F0F4F8;border-radius:6px;display:flex;justify-content:space-between;align-items:center;">
+            <span>🏗️ Plan de Expansión</span><button class="btn btn-sm btn-outline" onclick="showPage('expansiones')">Abrir</button>
+          </div>
+          <div style="padding:8px 12px;background:#F0F4F8;border-radius:6px;display:flex;justify-content:space-between;align-items:center;">
+            <span>🏘️ Gestión Multi-Municipio</span><button class="btn btn-sm btn-outline" onclick="showPage('municipios')">Abrir</button>
+          </div>
+          <div style="padding:8px 12px;background:#F0F4F8;border-radius:6px;display:flex;justify-content:space-between;align-items:center;">
+            <span>📥 Datos & Generar ETR</span><button class="btn btn-sm btn-outline" onclick="showPage('datos-etr')">Abrir</button>
+          </div>
+          <div style="padding:8px 12px;background:#F0F4F8;border-radius:6px;display:flex;justify-content:space-between;align-items:center;">
+            <span>🧮 Calculadoras SIEAP</span><button class="btn btn-sm btn-outline" onclick="showPage('calculadoras')">Abrir</button>
+          </div>
+          <div style="padding:8px 12px;background:#F0F4F8;border-radius:6px;display:flex;justify-content:space-between;align-items:center;">
+            <span>☀️ Energía Fotovoltaica</span><button class="btn btn-sm btn-outline" onclick="showPage('fotovoltaico')">Abrir</button>
+          </div>
+          <div style="padding:8px 12px;background:#F0F4F8;border-radius:6px;display:flex;justify-content:space-between;align-items:center;">
+            <span>⚖️ Tributario IAP</span><button class="btn btn-sm btn-outline" onclick="showPage('tributario')">Abrir</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">⚠️ Problemas frecuentes</div>
+        <div style="display:flex;flex-direction:column;gap:8px;font-size:0.82rem;">
+          <div style="padding:8px 12px;background:#FFF3CD;border-radius:6px;border-left:3px solid #E87722;">
+            <strong>El mapa no carga:</strong> Necesitas conexión a internet para cargar OpenStreetMap.
+          </div>
+          <div style="padding:8px 12px;background:#FFF3CD;border-radius:6px;border-left:3px solid #E87722;">
+            <strong>Los datos se borraron:</strong> Los datos se guardan en el navegador. No borres el historial/caché.
+          </div>
+          <div style="padding:8px 12px;background:#D4EDDA;border-radius:6px;border-left:3px solid #2E8B34;">
+            <strong>Para exportar datos:</strong> Cada módulo tiene botón "📤 Exportar" que descarga CSV o Word.
+          </div>
+          <div style="padding:8px 12px;background:#D4EDDA;border-radius:6px;border-left:3px solid #2E8B34;">
+            <strong>Para importar datos:</strong> Usa "📥 Importar CSV" con la plantilla descargable.
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===================== MÓDULO DE AYUDA ===================== -->
+<div id="page-ayuda" class="page" style="display:none">
+  <div class="page-header" style="background:linear-gradient(135deg,#003366,#0055A5);">
+    <span class="page-header-icon">❓</span>
+    <div>
+      <h1>Centro de Ayuda — SIEAP</h1>
+      <p>Guía paso a paso · Solución de problemas · Videos tutoriales</p>
+    </div>
+  </div>
+
+  <div class="tabs">
+    <button class="tab-btn active" onclick="showTab(this,'ay-inicio')">🚀 Inicio rápido</button>
+    <button class="tab-btn" onclick="showTab(this,'ay-municipio')">🏛️ Municipio</button>
+    <button class="tab-btn" onclick="showTab(this,'ay-etr')">📊 ETR</button>
+    <button class="tab-btn" onclick="showTab(this,'ay-lum')">💡 Luminarias</button>
+    <button class="tab-btn" onclick="showTab(this,'ay-mapa')">🗺️ Mapa SIAP</button>
+    <button class="tab-btn" onclick="showTab(this,'ay-problemas')">🔧 Problemas</button>
+  </div>
+
+  <!-- INICIO RÁPIDO -->
+  <div id="ay-inicio" class="tab-panel active" style="padding:0;margin-top:14px;">
+    <div class="card">
+      <div class="card-title">🚀 Empieza aquí — 4 pasos para usar el SIEAP</div>
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-top:10px;">
+        <div onclick="showPage('municipios')" style="background:linear-gradient(135deg,#003366,#0055A5);color:white;border-radius:10px;padding:20px;text-align:center;cursor:pointer;transition:transform 0.2s;" onmouseover="this.style.transform='scale(1.03)'" onmouseout="this.style.transform=''">
+          <div style="font-size:2rem;margin-bottom:8px;">🏛️</div>
+          <div style="font-weight:700;font-size:0.9rem;">PASO 1</div>
+          <div style="font-size:0.8rem;margin-top:4px;color:#A8C4E0;">Registrar municipio en<br><strong style="color:white;">Gestión Multi-Municipio</strong></div>
+        </div>
+        <div onclick="showPage('datos-etr')" style="background:linear-gradient(135deg,#1a4a1a,#2E8B34);color:white;border-radius:10px;padding:20px;text-align:center;cursor:pointer;transition:transform 0.2s;" onmouseover="this.style.transform='scale(1.03)'" onmouseout="this.style.transform=''">
+          <div style="font-size:2rem;margin-bottom:8px;">📊</div>
+          <div style="font-weight:700;font-size:0.9rem;">PASO 2</div>
+          <div style="font-size:0.8rem;margin-top:4px;color:#A8D8A8;">Ingresar datos en<br><strong style="color:white;">Datos & Generar ETR</strong></div>
+        </div>
+        <div onclick="showPage('luminarias')" style="background:linear-gradient(135deg,#7a4a00,#E87722);color:white;border-radius:10px;padding:20px;text-align:center;cursor:pointer;transition:transform 0.2s;" onmouseover="this.style.transform='scale(1.03)'" onmouseout="this.style.transform=''">
+          <div style="font-size:2rem;margin-bottom:8px;">💡</div>
+          <div style="font-weight:700;font-size:0.9rem;">PASO 3</div>
+          <div style="font-size:0.8rem;margin-top:4px;color:#FFE0A0;">Registrar luminarias en<br><strong style="color:white;">Inventario de Luminarias</strong></div>
+        </div>
+        <div onclick="showPage('geo-pro')" style="background:linear-gradient(135deg,#4a1a7a,#7a2daa);color:white;border-radius:10px;padding:20px;text-align:center;cursor:pointer;transition:transform 0.2s;" onmouseover="this.style.transform='scale(1.03)'" onmouseout="this.style.transform=''">
+          <div style="font-size:2rem;margin-bottom:8px;">🗺️</div>
+          <div style="font-weight:700;font-size:0.9rem;">PASO 4</div>
+          <div style="font-size:0.8rem;margin-top:4px;color:#D0A0FF;">Georreferenciar en<br><strong style="color:white;">SIAP Georreferenciación</strong></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- MÓDULOS DISPONIBLES -->
+    <div class="card">
+      <div class="card-title">📋 Todos los módulos del SIEAP</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;font-size:0.82rem;">
+        <div style="display:flex;flex-direction:column;gap:6px;">
+          <div style="background:#EBF2FA;border-radius:8px;padding:10px 14px;border-left:3px solid #0055A5;">
+            <strong>🗺️ Cobertura & Diagnóstico</strong><br>
+            <span style="color:#555;">Diagnóstico de cobertura vial por zonas. Guardar y exportar.</span>
+            <button onclick="showPage('cobertura')" class="btn btn-primary btn-sm" style="margin-top:6px;font-size:0.72rem;">Ir al módulo →</button>
+          </div>
+          <div style="background:#EBF2FA;border-radius:8px;padding:10px 14px;border-left:3px solid #0055A5;">
+            <strong>🛰️ SIAP Georreferenciación</strong><br>
+            <span style="color:#555;">Mapa real con GPS. Agrega postes con fotos y fichas técnicas RETILAP.</span>
+            <button onclick="showPage('geo-pro')" class="btn btn-primary btn-sm" style="margin-top:6px;font-size:0.72rem;">Ir al módulo →</button>
+          </div>
+          <div style="background:#EBF2FA;border-radius:8px;padding:10px 14px;border-left:3px solid #0055A5;">
+            <strong>💡 Inventario de Luminarias</strong><br>
+            <span style="color:#555;">Registra, importa CSV, exporta. Ficha técnica por luminaria.</span>
+            <button onclick="showPage('luminarias')" class="btn btn-primary btn-sm" style="margin-top:6px;font-size:0.72rem;">Ir al módulo →</button>
+          </div>
+          <div style="background:#EBF2FA;border-radius:8px;padding:10px 14px;border-left:3px solid #0055A5;">
+            <strong>🔬 Simulación Fotométrica</strong><br>
+            <span style="color:#555;">Calcula iluminancia, uniformidad Uo, verificación RETILAP §560.</span>
+            <button onclick="showPage('simulacion')" class="btn btn-primary btn-sm" style="margin-top:6px;font-size:0.72rem;">Ir al módulo →</button>
+          </div>
+          <div style="background:#EBF2FA;border-radius:8px;padding:10px 14px;border-left:3px solid #0055A5;">
+            <strong>📊 Costos ETR (CREG)</strong><br>
+            <span style="color:#555;">Fórmula CTMAX desagregada: CSEE + CINV + CAOM + COTR.</span>
+            <button onclick="showPage('costos')" class="btn btn-primary btn-sm" style="margin-top:6px;font-size:0.72rem;">Ir al módulo →</button>
+          </div>
+          <div style="background:#EBF2FA;border-radius:8px;padding:10px 14px;border-left:3px solid #E87722;">
+            <strong>🔧 Mantenimiento</strong><br>
+            <span style="color:#555;">Órdenes de trabajo, inventario de materiales, historial.</span>
+            <button onclick="showPage('mantenimiento')" class="btn btn-warning btn-sm" style="margin-top:6px;font-size:0.72rem;">Ir al módulo →</button>
+          </div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:6px;">
+          <div style="background:#EBF2FA;border-radius:8px;padding:10px 14px;border-left:3px solid #CC2200;">
+            <strong>🚨 Incidencias</strong><br>
+            <span style="color:#555;">Registra fallas, prioridades, cierra incidencias.</span>
+            <button onclick="showPage('incidencias')" class="btn btn-danger btn-sm" style="margin-top:6px;font-size:0.72rem;">Ir al módulo →</button>
+          </div>
+          <div style="background:#EBF2FA;border-radius:8px;padding:10px 14px;border-left:3px solid #2E8B34;">
+            <strong>💰 Tarifas IAP</strong><br>
+            <span style="color:#555;">Escala tarifaria, calculadora, acuerdo municipal, Art. 351.</span>
+            <button onclick="showPage('tarifas')" class="btn btn-success btn-sm" style="margin-top:6px;font-size:0.72rem;">Ir al módulo →</button>
+          </div>
+          <div style="background:#EBF2FA;border-radius:8px;padding:10px 14px;border-left:3px solid #0055A5;">
+            <strong>🏘️ Gestión Multi-Municipio</strong><br>
+            <span style="color:#555;">Registra varios municipios. Comparativo regional. Cargar en ETR.</span>
+            <button onclick="showPage('municipios')" class="btn btn-primary btn-sm" style="margin-top:6px;font-size:0.72rem;">Ir al módulo →</button>
+          </div>
+          <div style="background:#EBF2FA;border-radius:8px;padding:10px 14px;border-left:3px solid #2E8B34;">
+            <strong>📥 Datos & Generar ETR</strong><br>
+            <span style="color:#555;">ETR completo CREG 101013/2022. Genera Word y CSV.</span>
+            <button onclick="showPage('datos-etr')" class="btn btn-success btn-sm" style="margin-top:6px;font-size:0.72rem;">Ir al módulo →</button>
+          </div>
+          <div style="background:#EBF2FA;border-radius:8px;padding:10px 14px;border-left:3px solid #E87722;">
+            <strong>🧮 Calculadoras SIEAP</strong><br>
+            <span style="color:#555;">IAP, mora, cobro coactivo, red eléctrica, ROI LED, IPC/IPP.</span>
+            <button onclick="showPage('calculadoras')" class="btn btn-warning btn-sm" style="margin-top:6px;font-size:0.72rem;">Ir al módulo →</button>
+          </div>
+          <div style="background:#EBF2FA;border-radius:8px;padding:10px 14px;border-left:3px solid #4a1a7a;">
+            <strong>⚖️ Tributario IAP</strong><br>
+            <span style="color:#555;">Elementos tributarios, sentencias CE y CC, modelo acuerdo.</span>
+            <button onclick="showPage('tributario')" class="btn btn-outline btn-sm" style="margin-top:6px;font-size:0.72rem;">Ir al módulo →</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PASO A PASO: MUNICIPIO -->
+  <div id="ay-municipio" class="tab-panel" style="display:none;margin-top:14px;">
+    <div class="card">
+      <div class="card-title">🏛️ Cómo registrar un municipio — Paso a paso</div>
+      <div style="display:flex;flex-direction:column;gap:12px;font-size:0.83rem;">
+        <div style="display:flex;gap:14px;align-items:flex-start;padding:12px;background:#F0F4F8;border-radius:8px;">
+          <div style="background:#003366;color:white;border-radius:50%;width:32px;height:32px;display:flex;align-items:center;justify-content:center;font-weight:800;flex-shrink:0;">1</div>
+          <div><strong>Ir a Gestión Multi-Municipio</strong><br>Haz clic en el menú izquierdo → "Gestión Multi-Municipio"<br><button onclick="showPage('municipios')" class="btn btn-primary btn-sm" style="margin-top:6px;">→ Ir ahora</button></div>
+        </div>
+        <div style="display:flex;gap:14px;align-items:flex-start;padding:12px;background:#F0F4F8;border-radius:8px;">
+          <div style="background:#003366;color:white;border-radius:50%;width:32px;height:32px;display:flex;align-items:center;justify-content:center;font-weight:800;flex-shrink:0;">2</div>
+          <div><strong>Clic en "+ Nuevo"</strong><br>Aparece el botón verde "+ Nuevo" en el panel izquierdo de la lista de municipios.</div>
+        </div>
+        <div style="display:flex;gap:14px;align-items:flex-start;padding:12px;background:#F0F4F8;border-radius:8px;">
+          <div style="background:#003366;color:white;border-radius:50%;width:32px;height:32px;display:flex;align-items:center;justify-content:center;font-weight:800;flex-shrink:0;">3</div>
+          <div><strong>Llenar el formulario</strong><br>
+            Campos obligatorios:<br>
+            • <strong>Municipio:</strong> Ej: Morroa<br>
+            • <strong>Departamento:</strong> Ej: Sucre<br>
+            • <strong>NIT:</strong> NIT del municipio<br>
+            • <strong>Secretario/a Hacienda</strong><br>
+            • <strong>Total luminarias SALP</strong><br>
+            • <strong>CR Total SALP</strong> (valor activos en COP)<br>
+            • <strong>Recaudo IAP mensual</strong>
+          </div>
+        </div>
+        <div style="display:flex;gap:14px;align-items:flex-start;padding:12px;background:#D4EDDA;border-radius:8px;border-left:3px solid #2E8B34;">
+          <div style="background:#2E8B34;color:white;border-radius:50%;width:32px;height:32px;display:flex;align-items:center;justify-content:center;font-weight:800;flex-shrink:0;">4</div>
+          <div><strong>Clic en "💾 Guardar Municipio"</strong><br>El municipio aparece en la lista y puedes cargarlo en el ETR con "📥 Cargar en módulo ETR".</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PASO A PASO: ETR -->
+  <div id="ay-etr" class="tab-panel" style="display:none;margin-top:14px;">
+    <div class="card">
+      <div class="card-title">📊 Cómo generar el ETR — Paso a paso</div>
+      <div style="display:flex;flex-direction:column;gap:12px;font-size:0.83rem;">
+        <div class="alert alert-info">ℹ️ <strong>Requisito previo:</strong> Tener registrado el municipio en Gestión Multi-Municipio.</div>
+        <div style="display:flex;gap:14px;align-items:flex-start;padding:12px;background:#F0F4F8;border-radius:8px;">
+          <div style="background:#2E8B34;color:white;border-radius:50%;width:32px;height:32px;display:flex;align-items:center;justify-content:center;font-weight:800;flex-shrink:0;">1</div>
+          <div><strong>Ir a Datos & Generar ETR</strong><br><button onclick="showPage('datos-etr')" class="btn btn-success btn-sm" style="margin-top:4px;">→ Ir ahora</button></div>
+        </div>
+        <div style="display:flex;gap:14px;align-items:flex-start;padding:12px;background:#F0F4F8;border-radius:8px;">
+          <div style="background:#2E8B34;color:white;border-radius:50%;width:32px;height:32px;display:flex;align-items:center;justify-content:center;font-weight:800;flex-shrink:0;">2</div>
+          <div><strong>Pestaña "Municipio"</strong><br>Ingresa nombre, departamento, secretario, vigencia, comercializadora.</div>
+        </div>
+        <div style="display:flex;gap:14px;align-items:flex-start;padding:12px;background:#F0F4F8;border-radius:8px;">
+          <div style="background:#2E8B34;color:white;border-radius:50%;width:32px;height:32px;display:flex;align-items:center;justify-content:center;font-weight:800;flex-shrink:0;">3</div>
+          <div><strong>Pestaña "Inventario"</strong><br>Ingresa CR luminarias, CR activos no-luminaria, cantidad por tecnología y potencias.</div>
+        </div>
+        <div style="display:flex;gap:14px;align-items:flex-start;padding:12px;background:#F0F4F8;border-radius:8px;">
+          <div style="background:#2E8B34;color:white;border-radius:50%;width:32px;height:32px;display:flex;align-items:center;justify-content:center;font-weight:800;flex-shrink:0;">4</div>
+          <div><strong>Pestañas CSEE, CINV, CAOM, COTR</strong><br>Ingresa tarifa energía, horas operación, parámetros financieros. El sistema calcula automáticamente.</div>
+        </div>
+        <div style="display:flex;gap:14px;align-items:flex-start;padding:12px;background:#D4EDDA;border-radius:8px;border-left:3px solid #2E8B34;">
+          <div style="background:#2E8B34;color:white;border-radius:50%;width:32px;height:32px;display:flex;align-items:center;justify-content:center;font-weight:800;flex-shrink:0;">5</div>
+          <div><strong>Pestaña "ETR Completo" → Calcular y Generar</strong><br>Clic en "🧮 Calcular ETR" → revisa el CTMAX → clic en "📄 Generar Word ETR" para descargar el documento.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PASO A PASO: LUMINARIAS -->
+  <div id="ay-lum" class="tab-panel" style="display:none;margin-top:14px;">
+    <div class="card">
+      <div class="card-title">💡 Cómo registrar luminarias</div>
+      <div style="display:flex;flex-direction:column;gap:12px;font-size:0.83rem;">
+        <div style="background:#FFF3CD;border-radius:8px;padding:10px 14px;border-left:3px solid #E87722;">
+          <strong>Opción A — Manual (una por una):</strong><br>
+          Ve a Inventario de Luminarias → Pestaña "➕ Registrar" → Completa el formulario → "💾 Registrar Luminaria"
+          <br><button onclick="showPage('luminarias')" class="btn btn-warning btn-sm" style="margin-top:6px;">→ Ir al inventario</button>
+        </div>
+        <div style="background:#D4EDDA;border-radius:8px;padding:10px 14px;border-left:3px solid #2E8B34;">
+          <strong>Opción B — Importar CSV (masivo):</strong><br>
+          1. Descarga la plantilla con "📋 Plantilla CSV"<br>
+          2. Llena el archivo con tus datos<br>
+          3. Sube con "📥 Importar CSV"<br><br>
+          <strong>Formato:</strong> codigo;tecnologia;potencia_W;flujo_lm;zona;anio;estado
+        </div>
+        <div style="background:#CCE5FF;border-radius:8px;padding:10px 14px;border-left:3px solid #0055A5;">
+          <strong>Opción C — Desde el mapa SIAP:</strong><br>
+          Ve a SIAP Georreferenciación → "📍 Agregar luminaria" → Haz clic en el mapa → Llena la ficha técnica completa con GPS y foto.
+          <br><button onclick="showPage('geo-pro')" class="btn btn-primary btn-sm" style="margin-top:6px;">→ Ir al mapa</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PASO A PASO: MAPA -->
+  <div id="ay-mapa" class="tab-panel" style="display:none;margin-top:14px;">
+    <div class="card">
+      <div class="card-title">🗺️ Cómo usar el mapa SIAP Georreferenciación</div>
+      <div style="display:flex;flex-direction:column;gap:12px;font-size:0.83rem;">
+        <div style="display:flex;gap:14px;align-items:flex-start;padding:12px;background:#F0F4F8;border-radius:8px;">
+          <div style="background:#4a1a7a;color:white;border-radius:50%;width:32px;height:32px;display:flex;align-items:center;justify-content:center;font-weight:800;flex-shrink:0;">1</div>
+          <div><strong>Abrir el mapa</strong><br>Clic en "SIAP Georreferenciación" en el menú. El mapa carga automáticamente con OpenStreetMap.<br><button onclick="showPage('geo-pro')" class="btn btn-primary btn-sm" style="margin-top:4px;">→ Abrir mapa</button></div>
+        </div>
+        <div style="display:flex;gap:14px;align-items:flex-start;padding:12px;background:#F0F4F8;border-radius:8px;">
+          <div style="background:#4a1a7a;color:white;border-radius:50%;width:32px;height:32px;display:flex;align-items:center;justify-content:center;font-weight:800;flex-shrink:0;">2</div>
+          <div><strong>Agregar una luminaria</strong><br>Clic en "📍 Agregar luminaria" → El cursor cambia → Haz clic en el mapa donde está el poste → Se abre la ficha técnica.</div>
+        </div>
+        <div style="display:flex;gap:14px;align-items:flex-start;padding:12px;background:#F0F4F8;border-radius:8px;">
+          <div style="background:#4a1a7a;color:white;border-radius:50%;width:32px;height:32px;display:flex;align-items:center;justify-content:center;font-weight:800;flex-shrink:0;">3</div>
+          <div><strong>Llenar la ficha técnica (5 pestañas)</strong><br>
+            • <strong>Identificación:</strong> Código, dirección, zona<br>
+            • <strong>Técnico:</strong> Tecnología, potencia, flujo, clase vía<br>
+            • <strong>Foto:</strong> Subir foto o usar GPS automático<br>
+            • <strong>Mantenimiento:</strong> Estado, fallas<br>
+            • <strong>CREG/RETILAP:</strong> Valoración UCAP automática
+          </div>
+        </div>
+        <div style="display:flex;gap:14px;align-items:flex-start;padding:12px;background:#D4EDDA;border-radius:8px;border-left:3px solid #2E8B34;">
+          <div style="background:#2E8B34;color:white;border-radius:50%;width:32px;height:32px;display:flex;align-items:center;justify-content:center;font-weight:800;flex-shrink:0;">4</div>
+          <div><strong>"💾 Guardar en SIAP"</strong><br>El marcador aparece en el mapa con color según estado. Puedes exportar todo con "📤 Exportar SIAP".</div>
+        </div>
+        <div style="background:#FFF3CD;border-radius:8px;padding:10px 14px;border-left:3px solid #E87722;">
+          <strong>💡 Tip GPS:</strong> Usa el botón "📡 Mi GPS" para capturar automáticamente las coordenadas exactas desde tu celular o PC con GPS.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SOLUCIÓN DE PROBLEMAS -->
+  <div id="ay-problemas" class="tab-panel" style="display:none;margin-top:14px;">
+    <div class="card">
+      <div class="card-title">🔧 Solución de problemas frecuentes</div>
+      <div style="display:flex;flex-direction:column;gap:10px;font-size:0.83rem;">
+        <details style="background:#F0F4F8;border-radius:8px;padding:12px;cursor:pointer;">
+          <summary style="font-weight:700;color:#003366;">❓ Al hacer clic en el menú no cambia la pantalla</summary>
+          <div style="margin-top:8px;color:#555;">
+            Esto ocurre si el JavaScript no ha terminado de cargar.<br>
+            <strong>Solución:</strong> Espera 3 segundos y vuelve a hacer clic. Si persiste, presiona <strong>F5</strong> para recargar la página.
+          </div>
+        </details>
+        <details style="background:#F0F4F8;border-radius:8px;padding:12px;cursor:pointer;">
+          <summary style="font-weight:700;color:#003366;">❓ El mapa no carga</summary>
+          <div style="margin-top:8px;color:#555;">
+            El mapa requiere conexión a internet para cargar los tiles de OpenStreetMap.<br>
+            <strong>Solución:</strong> Verifica tu conexión y espera unos segundos. Si estás en red lenta, el mapa puede tardar 5-10 segundos.
+          </div>
+        </details>
+        <details style="background:#F0F4F8;border-radius:8px;padding:12px;cursor:pointer;">
+          <summary style="font-weight:700;color:#003366;">❓ Los datos que guardé desaparecieron</summary>
+          <div style="margin-top:8px;color:#555;">
+            Los datos se guardan en el almacenamiento local del navegador (localStorage).<br>
+            <strong>Causas posibles:</strong> Limpiaste el caché del navegador, usaste modo incógnito, o cambiaste de navegador.<br>
+            <strong>Solución:</strong> Usa siempre el mismo navegador. Exporta tus datos en CSV/Word regularmente como respaldo.
+          </div>
+        </details>
+        <details style="background:#F0F4F8;border-radius:8px;padding:12px;cursor:pointer;">
+          <summary style="font-weight:700;color:#003366;">❓ El botón "Guardar" no hace nada</summary>
+          <div style="margin-top:8px;color:#555;">
+            <strong>Solución:</strong> Verifica que llenaste los campos obligatorios (marcados con *). El sistema muestra una notificación verde cuando guarda correctamente.
+          </div>
+        </details>
+        <details style="background:#F0F4F8;border-radius:8px;padding:12px;cursor:pointer;">
+          <summary style="font-weight:700;color:#003366;">❓ El ETR no calcula</summary>
+          <div style="margin-top:8px;color:#555;">
+            <strong>Solución:</strong> Ingresa al menos los valores de potencia, tarifa energía y horas de operación en la pestaña CSEE. Luego haz clic en "🧮 Calcular ETR" en la pestaña final.
+          </div>
+        </details>
+        <details style="background:#F0F4F8;border-radius:8px;padding:12px;cursor:pointer;">
+          <summary style="font-weight:700;color:#003366;">❓ El sistema carga lento</summary>
+          <div style="margin-top:8px;color:#555;">
+            El sistema pesa ~350KB. En conexión de 1 Mbps tarda ~3 segundos en la primera carga.<br>
+            <strong>Solución:</strong> Después de la primera carga el navegador guarda en caché y es mucho más rápido. Usa el enlace de Cloudflare para mejor velocidad.
+          </div>
+        </details>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">📞 Soporte FUCDESCOC</div>
+      <div style="font-size:0.83rem;display:flex;flex-direction:column;gap:8px;">
+        <div style="padding:10px 14px;background:#EBF2FA;border-radius:8px;display:flex;align-items:center;gap:10px;">
+          <span style="font-size:1.5rem;">🏛️</span>
+          <div><strong>FUCDESCOC</strong><br>Fundación Colombia Humanitaria para el Desarrollo Sostenible de la Costa Caribe<br>NIT 900.517.521-0</div>
+        </div>
+        <div style="padding:10px 14px;background:#EBF2FA;border-radius:8px;">
+          <strong>Director General:</strong> Álvaro Antonio Barrios Barrios<br>
+          <strong>Sistema:</strong> SIEAP v18 — Res. CREG 101013/2022<br>
+          <strong>Cobertura:</strong> Municipios de Sucre — Morroa, Chalán, Colosó, Ovejas, Galeras, Corozal, San Onofre, Tolú
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
 </main>
 </div>
 <div class="modal-overlay" id="modal-overlay" onclick="cerrarModal(event)">
@@ -2594,6 +3115,6 @@ Las tarifas del presente Acuerdo están soportadas en el Estudio Técnico de Ref
 
 <div id="sieap-toast" style="display:none;"></div>
 <div id="sieap-toast"></div>
-<script src="sieap.js" defer></script>
+<script src="sieap.js"></script>
 </body>
 </html>
