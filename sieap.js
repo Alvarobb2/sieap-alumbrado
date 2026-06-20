@@ -1175,10 +1175,10 @@ function calcularSimulacion() {
 }
 
 function calcularTarifa() {
-  const consumo = parseFloat(document.getElementById('tar-consumo')?.value);
+  var consumo = parseFloat(document.getElementById('tar-consumo')?.value);
   if(!consumo) { safeSet('monto-iap','$0'); safeSet('concepto-tarifa','Ingresa el consumo'); return; }
   const estrato = document.getElementById('tar-estrato').value;
-  const consumo = parseFloat(document.getElementById('tar-consumo').value)||0;
+  consumo = parseFloat(document.getElementById('tar-consumo').value)||0;
   const tarifaE = parseFloat(document.getElementById('tar-tarifa-energia').value)||890;
   const metodo = document.getElementById('tar-metodo').value;
   const pct = parseFloat(document.getElementById('tar-pct').value)||4.5;
