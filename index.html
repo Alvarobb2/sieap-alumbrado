@@ -7152,6 +7152,602 @@ document.addEventListener('DOMContentLoaded', function(){
   setTimeout(tarifaRenderTabla, 400);
 });
 
+
+// ============================================================
+// SIEAP — MOTOR DE DATOS PERSISTENTE
+// Todos los módulos guardan/cargan desde localStorage
+// Implementación metodológica y coherente
+// ============================================================
+
+// ── BASE DE DATOS LOCAL ──────────────────────────────────────
+const DB = {
+  get: (key) => { try { return JSON.parse(localStorage.getItem('SIEAP_'+key)||'[]'); } catch(e){ return []; } },
+  set: (key, val) => { try { localStorage.setItem('SIEAP_'+key, JSON.stringify(val)); } catch(e){} },
+  add: (key, item) => { const arr = DB.get(key); arr.push({...item, id: Date.now(), ts: new Date().toISOString()}); DB.set(key, arr); return arr; },
+  del: (key, id) => { const arr = DB.get(key).filter(i=>i.id!==id); DB.set(key, arr); return arr; },
+  update: (key, id, item) => { const arr = DB.get(key).map(i=>i.id===id?{...i,...item}:i); DB.set(key, arr); return arr; }
+};
+
+// ── UTILIDADES UI ────────────────────────────────────────────
+function gVal(id) { const e=document.getElementById(id); return e ? e.value.trim() : ''; }
+function gNum(id) { const e=document.getElementById(id); return e ? parseFloat(e.value)||0 : 0; }
+function setVal(id, v) { const e=document.getElementById(id); if(e) e.value=v||''; }
+function clearFields(ids) { ids.forEach(id=>setVal(id,'')); }
+function getMuni() { return gVal('etr-municipio')||'Municipio'; }
+function getFecha() { return new Date().toLocaleDateString('es-CO',{day:'2-digit',month:'long',year:'numeric'}); }
+function hoy() { return new Date().toISOString().split('T')[0]; }
+
+function showToast(msg, tipo='success') {
+  let t = document.getElementById('sieap-toast');
+  if(!t){ t=document.createElement('div'); t.id='sieap-toast';
+    t.style.cssText='position:fixed;bottom:20px;right:20px;z-index:99999;padding:12px 20px;border-radius:8px;font-size:0.85rem;font-weight:600;box-shadow:0 4px 20px rgba(0,0,0,0.3);max-width:360px;transition:all 0.3s;';
+    document.body.appendChild(t); }
+  const colors={'success':'#D4EDDA:#1a7a2a','error':'#F8D7DA:#721c24','info':'#CCE5FF:#004085','warning':'#FFF3CD:#856404'};
+  const [bg,color]=(colors[tipo]||colors.success).split(':');
+  t.style.background=bg; t.style.color=color; t.style.border='1px solid '+color;
+  t.textContent=msg; t.style.display='block';
+  setTimeout(()=>{ t.style.display='none'; }, 3500);
+}
+
+function confirmar(msg) { return confirm(msg); }
+
+// ── 1. LUMINARIAS — CRUD COMPLETO ───────────────────────────
+function lumRegistrar() {
+  // Leer campos del formulario de registro
+  const codigo = gVal('lum-reg-codigo');
+  const tec    = gVal('lum-reg-tec') || document.getElementById('lum-reg-tec')?.value;
+  const pot    = gNum('lum-reg-pot');
+  const flujo  = gNum('lum-reg-flujo');
+  const zona   = gVal('lum-reg-zona');
+  const anio   = gVal('lum-reg-anio');
+  const estado = gVal('lum-reg-estado') || document.getElementById('lum-reg-estado')?.value || 'Operativa';
+
+  if(!codigo) { showToast('⚠️ Ingresa el código de la luminaria', 'error'); return; }
+  if(!pot)    { showToast('⚠️ Ingresa la potencia', 'error'); return; }
+
+  const eficacia = flujo && pot ? (flujo/pot).toFixed(1) : '—';
+  const vidaUtil = {LED:25, 'HID':15, 'Sodio AP':15, 'Mercurio':15}[tec] || 20;
+
+  const item = { codigo, tec, pot, flujo, eficacia, zona, anio, estado, vida_util: vidaUtil };
+  DB.add('luminarias', item);
+  lumActualizarTabla();
+  lumLimpiar();
+  lumActualizarKPIs();
+  showToast('✅ Luminaria '+codigo+' registrada exitosamente');
+}
+
+function lumActualizarTabla() {
+  const lums = DB.get('luminarias');
+  const tbody = document.getElementById('lum-tabla-body');
+  if(!tbody) return;
+  if(lums.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="10" style="text-align:center;padding:30px;color:#aaa;"><div style="font-size:1.5rem;margin-bottom:8px;">💡</div>Sin luminarias. Use "➕ Registrar" o "📥 Importar CSV".</td></tr>';
+    return;
+  }
+  const badgeMap = {'Operativa':'badge-verde','Mantenimiento':'badge-amarillo','Reemplazar':'badge-rojo','Con falla':'badge-rojo'};
+  tbody.innerHTML = lums.map(l=>`<tr>
+    <td><strong>${l.codigo}</strong></td>
+    <td>${l.tec}</td>
+    <td>${l.pot}W</td>
+    <td>${l.flujo||'—'}</td>
+    <td>${l.eficacia} lm/W</td>
+    <td>${l.zona||'—'}</td>
+    <td>${l.anio||'—'}</td>
+    <td>${l.vida_util||'—'} años</td>
+    <td><span class="badge ${badgeMap[l.estado]||'badge-gris'}">${l.estado}</span></td>
+    <td>
+      <button class="btn btn-sm btn-outline" onclick="lumVer(${l.id})">Ver</button>
+      <button class="btn btn-sm btn-danger" onclick="lumEliminar(${l.id})" style="padding:3px 8px;">🗑️</button>
+    </td>
+  </tr>`).join('');
+}
+
+function lumVer(id) {
+  const l = DB.get('luminarias').find(x=>x.id===id);
+  if(!l) return;
+  document.getElementById('modal-title').textContent = 'Luminaria — '+l.codigo;
+  document.getElementById('modal-body').innerHTML = `
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:0.83rem;">
+      ${[['Código',l.codigo],['Tecnología',l.tec+' '+l.pot+'W'],['Flujo',l.flujo+' lm'],['Eficacia',l.eficacia+' lm/W'],
+         ['Zona',l.zona],['Año inst.',l.anio],['Vida útil',l.vida_util+' años'],['Estado',l.estado]
+        ].map(([k,v])=>`<div style="padding:6px 10px;background:#F0F4F8;border-radius:5px;display:flex;justify-content:space-between;">
+          <span style="color:#888;">${k}</span><strong>${v||'—'}</strong></div>`).join('')}
+    </div>`;
+  document.getElementById('modal-overlay').classList.add('show');
+}
+
+function lumEliminar(id) {
+  if(!confirmar('¿Eliminar esta luminaria del inventario?')) return;
+  DB.del('luminarias', id);
+  lumActualizarTabla();
+  lumActualizarKPIs();
+  showToast('🗑️ Luminaria eliminada');
+}
+
+function lumLimpiar() {
+  clearFields(['lum-reg-codigo','lum-reg-pot','lum-reg-flujo','lum-reg-zona','lum-reg-anio']);
+}
+
+function lumActualizarKPIs() {
+  const lums = DB.get('luminarias');
+  const leds = lums.filter(l=>l.tec==='LED').length;
+  const hids = lums.filter(l=>l.tec==='HID'||l.tec==='Sodio AP').length;
+  const mercs = lums.filter(l=>l.tec==='Mercurio').length;
+  const potTotal = lums.reduce((s,l)=>s+(parseFloat(l.pot)||0),0)/1000;
+  safeSet('dash-total-lum', lums.length||'0');
+  // KPIs del inventario
+  const el1=document.querySelector('#page-luminarias .kpi.azul .kpi-value');
+  const el2=document.querySelector('#page-luminarias .kpi.naranja .kpi-value');
+  const el3=document.querySelector('#page-luminarias .kpi.rojo .kpi-value');
+  const el4=document.querySelector('#page-luminarias .kpi.verde .kpi-value');
+  if(el1) el1.textContent=leds;
+  if(el2) el2.textContent=hids;
+  if(el3) el3.textContent=mercs;
+  if(el4) el4.textContent=potTotal.toFixed(1);
+}
+
+// Conectar formulario existente con lumRegistrar()
+function conectarFormLuminarias() {
+  // Los campos del tab "Registrar" tienen IDs genéricos, los mapeamos
+  const mapeo = {
+    'lum-reg-codigo': null, // buscar por placeholder
+    'lum-reg-tec': null,
+    'lum-reg-pot': null,
+    'lum-reg-flujo': null,
+    'lum-reg-zona': null,
+    'lum-reg-anio': null,
+    'lum-reg-estado': null,
+  };
+  // Intentar asignar IDs a los campos existentes del tab Registrar
+  const tabReg = document.getElementById('tab-registro');
+  if(tabReg) {
+    const inputs = tabReg.querySelectorAll('input, select');
+    const campos = ['lum-reg-codigo','lum-reg-tec','lum-reg-pot','lum-reg-flujo','lum-reg-irc','lum-reg-ip','lum-reg-anio','lum-reg-vida','lum-reg-zona','lum-reg-valor'];
+    inputs.forEach((inp, i) => { if(campos[i] && !inp.id) inp.id = campos[i]; });
+    // Agregar estado si no existe
+    const estadoSelect = tabReg.querySelector('select');
+    if(estadoSelect && !document.getElementById('lum-reg-estado')) {
+      // crear select estado
+    }
+  }
+}
+
+// ── 2. MANTENIMIENTO — CRUD OT ───────────────────────────────
+function mantProgramar() {
+  const tipo   = document.querySelector('#page-mantenimiento select')?.value || 'Preventivo';
+  const zona   = document.querySelector('#page-mantenimiento input[placeholder="Ej: Zona Norte, Calle 12"]')?.value || '';
+  const fecha  = document.querySelector('#page-mantenimiento input[type="date"]')?.value || hoy();
+  const tecnico= document.querySelector('#page-mantenimiento input[placeholder="Nombre del técnico"]')?.value || '';
+  const lumsN  = document.querySelector('#page-mantenimiento input[placeholder="0"]')?.value || '0';
+  const activ  = document.querySelector('#page-mantenimiento select:nth-of-type(3)')?.value || '';
+
+  if(!zona && !tecnico) { showToast('⚠️ Ingresa zona y técnico asignado', 'warning'); return; }
+
+  const num = 'OT-'+new Date().getFullYear()+'-'+String(DB.get('ots').length+1).padStart(4,'0');
+  const ot = { num, tipo, zona, fecha, tecnico, luminarias:lumsN, actividad:activ, estado:'Programado' };
+  DB.add('ots', ot);
+  mantActualizarTabla();
+  showToast('✅ '+num+' programada correctamente');
+}
+
+function mantEjecutado() {
+  const ots = DB.get('ots');
+  const enCurso = ots.filter(o=>o.estado==='En curso'||o.estado==='Programado');
+  if(enCurso.length === 0) { showToast('No hay OT activas para marcar como ejecutadas', 'info'); return; }
+  const ultima = enCurso[enCurso.length-1];
+  DB.update('ots', ultima.id, { estado:'Ejecutado', fecha_ejecucion: hoy() });
+  mantActualizarTabla();
+  showToast('✅ '+ultima.num+' marcada como Ejecutada');
+}
+
+function mantActualizarTabla() {
+  const ots = DB.get('ots');
+  const tbody = document.querySelector('#page-mantenimiento table:first-of-type tbody') ||
+                document.getElementById('ot-tabla-body');
+  if(!tbody) return;
+  if(ots.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:20px;color:#aaa;">Sin órdenes de trabajo. Use el formulario para programar.</td></tr>';
+    return;
+  }
+  const badgeMap = {'Ejecutado':'badge-verde','En curso':'badge-azul','Programado':'badge-amarillo'};
+  tbody.innerHTML = ots.slice().reverse().slice(0,20).map(o=>`<tr>
+    <td><strong>${o.num}</strong></td>
+    <td>${o.tipo}</td>
+    <td>${o.zona||'—'}</td>
+    <td>${o.fecha||'—'}</td>
+    <td><span class="badge ${badgeMap[o.estado]||'badge-gris'}">${o.estado}</span></td>
+  </tr>`).join('');
+  // Actualizar KPIs mantenimiento
+  const programadas = ots.filter(o=>o.estado==='Programado').length;
+  safeSet('mant-mant', programadas);
+}
+
+function mantEliminar(btn) {
+  const fila = btn.closest('tr');
+  if(!fila) return;
+  if(!confirmar('¿Eliminar esta orden de trabajo?')) return;
+  fila.remove();
+  showToast('🗑️ Orden eliminada');
+}
+
+// ── 3. INCIDENCIAS — CRUD ────────────────────────────────────
+function registrarIncidencia() {
+  const poste  = gVal('inc-poste') || 'Sin código';
+  const tipo   = document.getElementById('inc-tipo')?.value || 'Luminaria apagada';
+  const dir    = gVal('inc-dir') || 'Sin dirección';
+  const prior  = document.getElementById('inc-prior')?.value || 'media';
+  const obs    = gVal('inc-obs') || '';
+
+  const iconMap = {'Luminaria apagada':'💡','Cable expuesto':'⚡','Vandalismo':'🔨','Brazo dañado':'🔩','Parpadeo':'🔆','Poste caído/inclinado':'⚠️'};
+  const icon = Object.entries(iconMap).find(([k])=>tipo.includes(k))?.[1] || '🚨';
+  const badgeMap = {'alta':'badge-rojo','media':'badge-amarillo','baja':'badge-verde'};
+  const ahora = new Date().toLocaleString('es-CO');
+
+  const item = { poste, tipo, dir, prior, obs, icon, ahora, estado:'Abierta' };
+  DB.add('incidencias', item);
+
+  const lista = document.getElementById('lista-incidencias');
+  if(lista) {
+    // Quitar mensaje vacío
+    const vacioMsg = lista.querySelector('div[style*="text-align:center"]');
+    if(vacioMsg) vacioMsg.remove();
+    // Agregar card
+    const card = document.createElement('div');
+    card.className = 'incidencia-card';
+    card.dataset.id = item.ts;
+    card.innerHTML = `
+      <div class="incid-icon">${icon}</div>
+      <div class="incid-body">
+        <div class="incid-title">${tipo} — ${poste}</div>
+        <div class="incid-meta">📍 ${dir} · 🕐 ${ahora}</div>
+        ${obs ? '<div class="incid-meta" style="color:#555;">📝 '+obs+'</div>' : ''}
+      </div>
+      <div class="incid-status" style="display:flex;flex-direction:column;gap:4px;align-items:flex-end;">
+        <span class="badge ${badgeMap[prior]||'badge-gris'}">${prior.charAt(0).toUpperCase()+prior.slice(1)}</span>
+        <button onclick="incCerrar(this)" class="btn btn-sm btn-outline" style="font-size:0.7rem;padding:2px 8px;">✅ Cerrar</button>
+      </div>`;
+    lista.prepend(card);
+  }
+
+  // Limpiar formulario
+  clearFields(['inc-poste','inc-dir','inc-obs']);
+  incActualizarContadores();
+  showToast('🚨 Incidencia registrada — '+poste);
+}
+
+function incCerrar(btn) {
+  const card = btn.closest('.incidencia-card');
+  if(!card) return;
+  card.style.opacity='0.5';
+  btn.textContent='Cerrada';
+  btn.disabled=true;
+  showToast('✅ Incidencia cerrada');
+  incActualizarContadores();
+}
+
+function incActualizarContadores() {
+  const cards = document.querySelectorAll('.incidencia-card');
+  const abiertas = Array.from(cards).filter(c=>c.style.opacity!=='0.5').length;
+  safeSet('dash-incidencias', abiertas);
+  // Actualizar contadores por prioridad
+  const contadores = {alta:0, media:0, baja:0};
+  cards.forEach(c=>{
+    if(c.style.opacity==='0.5') return;
+    const badge = c.querySelector('.badge');
+    if(badge?.classList.contains('badge-rojo')) contadores.alta++;
+    else if(badge?.classList.contains('badge-amarillo')) contadores.media++;
+    else if(badge?.classList.contains('badge-verde')) contadores.baja++;
+  });
+}
+
+// ── 4. COBERTURA — GUARDAR DIAGNÓSTICO ──────────────────────
+let COBERTURA_DB = [];
+
+function coberturaGuardar() {
+  // Leer campos del formulario de cobertura
+  const inputs = document.querySelectorAll('#page-cobertura .form-group input, #page-cobertura .form-group select');
+  if(!inputs.length) { showToast('Completa el formulario de diagnóstico', 'warning'); return; }
+
+  const zona    = inputs[0]?.value || '';
+  const tipoVia = inputs[1]?.value || '';
+  const clase   = inputs[2]?.value || '';
+  const longKm  = parseFloat(inputs[3]?.value)||0;
+  const lumExist= parseInt(inputs[4]?.value)||0;
+  const lumReq  = parseInt(inputs[5]?.value)||0;
+  const emCampo = parseFloat(inputs[6]?.value)||0;
+  const estado  = inputs[7]?.value || 'Aceptable';
+
+  if(!zona) { showToast('⚠️ Ingresa la zona o barrio', 'warning'); return; }
+
+  const item = { zona, tipoVia, clase, longKm, lumExist, lumReq, emCampo, estado };
+  COBERTURA_DB.push(item);
+  DB.add('cobertura', item);
+  coberturaActualizarTabla();
+  showToast('✅ Diagnóstico de '+zona+' guardado');
+}
+
+function coberturaActualizarTabla() {
+  const datos = DB.get('cobertura');
+  const tbody = document.querySelector('#page-cobertura table tbody');
+  if(!tbody) return;
+  if(datos.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:20px;color:#aaa;">Sin diagnóstico. Complete el formulario y guarde.</td></tr>';
+    return;
+  }
+  const badgeMap={'Óptimo':'badge-verde','Bueno':'badge-azul','Aceptable':'badge-amarillo','Deficiente':'badge-rojo','Sin iluminar':'badge-rojo'};
+  tbody.innerHTML = datos.map(d=>`<tr>
+    <td>${d.zona}</td>
+    <td>${d.longKm} km</td>
+    <td>${d.lumExist}</td>
+    <td>${d.lumReq>0?((d.lumExist/d.lumReq*100).toFixed(1)+'%'):'—'}</td>
+    <td><span class="badge ${badgeMap[d.estado]||'badge-gris'}">${d.estado}</span></td>
+  </tr>`).join('');
+}
+
+// ── 5. EXPANSIÓN — MODAL FORMULARIO ─────────────────────────
+function expansionNuevo() {
+  // Crear modal si no existe
+  let modal = document.getElementById('modal-expansion');
+  if(!modal) {
+    modal = document.createElement('div');
+    modal.id = 'modal-expansion';
+    modal.style.cssText = 'display:flex;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:9000;align-items:center;justify-content:center;';
+    modal.innerHTML = `
+      <div style="background:white;border-radius:12px;width:580px;max-width:96vw;padding:24px;box-shadow:0 20px 60px rgba(0,0,0,0.3);max-height:90vh;overflow-y:auto;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;">
+          <h3 style="color:#003366;font-size:1rem;">🏗️ Nuevo Proyecto de Expansión / Modernización</h3>
+          <button onclick="document.getElementById('modal-expansion').style.display='none'" style="background:none;border:none;font-size:1.4rem;cursor:pointer;">✕</button>
+        </div>
+        <div class="form-row">
+          <div class="form-group"><label>Nombre del proyecto</label><input type="text" id="exp-nombre" placeholder="Ej: Modernización LED Centro"></div>
+          <div class="form-group"><label>Zona / Sector</label><input type="text" id="exp-zona" placeholder="Ej: Centro urbano"></div>
+          <div class="form-group"><label>Tipo de proyecto</label>
+            <select id="exp-tipo">
+              <option>Modernización</option><option>Expansión</option><option>Reposición</option>
+              <option>Tecnológico</option><option>Ornamental</option>
+            </select>
+          </div>
+          <div class="form-group"><label>N° luminarias involucradas</label><input type="number" id="exp-lums" placeholder="0"></div>
+          <div class="form-group"><label>Inversión estimada (COP)</label><input type="number" id="exp-inversion" placeholder="0"></div>
+          <div class="form-group"><label>Año de ejecución</label><input type="number" id="exp-anio" placeholder="${new Date().getFullYear()}"></div>
+          <div class="form-group"><label>Estado inicial</label>
+            <select id="exp-estado">
+              <option>Planeado</option><option>Programado</option><option>En ejecución</option><option>Ejecutado</option>
+            </select>
+          </div>
+          <div class="form-group"><label>Fuente de financiación</label>
+            <select id="exp-fuente">
+              <option>Recaudo IAP</option><option>SGR</option><option>Crédito</option><option>Cofinanciación</option>
+            </select>
+          </div>
+          <div class="form-group"><label>Responsable técnico</label><input type="text" id="exp-responsable" placeholder="Nombre"></div>
+          <div class="form-group"><label>Observaciones</label><input type="text" id="exp-obs" placeholder="Descripción breve"></div>
+        </div>
+        <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:14px;">
+          <button class="btn btn-outline" onclick="document.getElementById('modal-expansion').style.display='none'">Cancelar</button>
+          <button class="btn btn-success" onclick="expansionGuardar()">💾 Guardar Proyecto</button>
+        </div>
+      </div>`;
+    document.body.appendChild(modal);
+  } else {
+    modal.style.display = 'flex';
+  }
+}
+
+function expansionGuardar() {
+  const nombre = gVal('exp-nombre');
+  const zona   = gVal('exp-zona');
+  const tipo   = document.getElementById('exp-tipo')?.value || 'Expansión';
+  const lums   = gNum('exp-lums');
+  const inv    = gNum('exp-inversion');
+  const anio   = gVal('exp-anio') || new Date().getFullYear();
+  const estado = document.getElementById('exp-estado')?.value || 'Planeado';
+  const fuente = document.getElementById('exp-fuente')?.value || 'Recaudo IAP';
+  const resp   = gVal('exp-responsable');
+  const obs    = gVal('exp-obs');
+
+  if(!nombre) { showToast('⚠️ Ingresa el nombre del proyecto', 'error'); return; }
+
+  const item = { nombre, zona, tipo, lums, inversion:inv, anio, estado, fuente, responsable:resp, obs, inicio:anio, dur:1 };
+  if(typeof EXPANSION_DB === 'undefined') window.EXPANSION_DB = [];
+  window.EXPANSION_DB.push(item);
+  DB.add('expansion', item);
+  expansionActualizarTabla();
+  document.getElementById('modal-expansion').style.display = 'none';
+  clearFields(['exp-nombre','exp-zona','exp-lums','exp-inversion','exp-anio','exp-responsable','exp-obs']);
+  showToast('✅ Proyecto "'+nombre+'" agregado al plan de expansión');
+}
+
+function expansionActualizarTabla() {
+  const proyectos = DB.get('expansion');
+  const tbody = document.querySelector('#page-expansiones table tbody') ||
+                document.getElementById('exp-tabla-body');
+  if(!tbody) return;
+  if(proyectos.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:20px;color:#aaa;">Sin proyectos. Use "➕ Nuevo proyecto".</td></tr>';
+    expansionActualizarKPIs(proyectos);
+    return;
+  }
+  const badgeMap={'Ejecutado':'badge-verde','En ejecución':'badge-azul','Programado':'badge-amarillo','Planeado':'badge-gris'};
+  tbody.innerHTML = proyectos.map((p,i)=>`<tr>
+    <td>${i+1}</td>
+    <td><strong>${p.nombre}</strong></td>
+    <td>${p.zona||'—'}</td>
+    <td>${p.tipo}</td>
+    <td>${p.lums||'—'}</td>
+    <td>$${(p.inversion||0).toLocaleString('es-CO')}</td>
+    <td>${p.anio}</td>
+    <td><span class="badge ${badgeMap[p.estado]||'badge-gris'}">${p.estado}</span></td>
+  </tr>`).join('');
+  expansionActualizarKPIs(proyectos);
+}
+
+function expansionActualizarKPIs(proyectos) {
+  const invTotal = proyectos.reduce((s,p)=>s+(p.inversion||0),0);
+  const lumTotal = proyectos.reduce((s,p)=>s+(p.lums||0),0);
+  const mercs = proyectos.filter(p=>p.tipo==='Reposición').reduce((s,p)=>s+(p.lums||0),0);
+  const kpis = document.querySelectorAll('#page-expansiones .kpi .kpi-value');
+  if(kpis[0]) kpis[0].textContent = proyectos.length;
+  if(kpis[1]) kpis[1].textContent = lumTotal.toLocaleString('es-CO');
+  if(kpis[2]) kpis[2].textContent = mercs;
+  if(kpis[3]) kpis[3].textContent = invTotal>=1e9?'$'+(invTotal/1e9).toFixed(1)+'B':'$'+(invTotal/1e6).toFixed(0)+'M';
+}
+
+// ── 6. GUARDAR SIMULACIÓN FOTOMÉTRICA ───────────────────────
+function guardarSimulacion() {
+  const em = document.getElementById('res-iluminancia')?.textContent;
+  const cumple = document.getElementById('res-cumple')?.textContent;
+  const via = document.getElementById('sim-via')?.value;
+  const ancho = gNum('sim-ancho');
+  const espaciado = gNum('sim-espaciado');
+  if(!em || em==='—') { showToast('Primero ejecuta la simulación', 'warning'); return; }
+  const item = { via, ancho, espaciado, em, cumple, fecha: hoy() };
+  DB.add('simulaciones', item);
+  showToast('✅ Simulación guardada — Clase '+via+': '+em+' lux');
+  const simHist = document.getElementById('sim-historial');
+  if(simHist) {
+    const sims = DB.get('simulaciones');
+    simHist.innerHTML = sims.slice(-5).reverse().map(s=>`
+      <div style="padding:6px 10px;background:#F0F4F8;border-radius:5px;font-size:0.78rem;display:flex;justify-content:space-between;">
+        <span>${s.via} | Ancho:${s.ancho}m | Esp:${s.espaciado}m</span>
+        <span><strong>${s.em} lux</strong> ${s.cumple}</span>
+      </div>`).join('');
+  }
+}
+
+// ── 7. COSTOS ETR — GUARDAR Y VINCULAR ──────────────────────
+function guardarResultadosETR() {
+  const csee = document.getElementById('monto-csee')?.textContent;
+  const cinv = document.getElementById('monto-cinv')?.textContent;
+  const caom = document.getElementById('monto-caom')?.textContent;
+  const cotr = document.getElementById('monto-cotros')?.textContent;
+  const ctmax = document.getElementById('monto-ctmax')?.textContent;
+  if(!ctmax || ctmax==='$0') { showToast('Primero completa y calcula los costos ETR', 'warning'); return; }
+  const item = { csee, cinv, caom, cotr, ctmax, fecha:hoy(), municipio:getMuni() };
+  DB.add('etr_guardados', item);
+  // Actualizar KPI dashboard
+  safeSet('dash-costo-etr', ctmax);
+  showToast('✅ Resultados ETR guardados — CTMAX: '+ctmax);
+}
+
+// ── 8. GEORREFERENCIACIÓN VIEJA — REDIRIGIR A SIAP PRO ──────
+function agregarPoste() {
+  // En lugar del mapa antiguo, redirigir al módulo SIAP profesional
+  showPage('geo-pro');
+  setTimeout(()=>{
+    const lat = document.getElementById('in-lat')?.value;
+    const lon = document.getElementById('in-lon')?.value;
+    if(lat && lon) {
+      const ftLat = document.getElementById('ft-lat');
+      const ftLon = document.getElementById('ft-lon');
+      if(ftLat) ftLat.value = lat;
+      if(ftLon) ftLon.value = lon;
+    }
+    if(typeof geoModalOpen === 'function') geoModalOpen();
+  }, 300);
+  showToast('📍 Usa el módulo SIAP Georreferenciación para agregar postes con mapa real', 'info');
+}
+
+// ── INICIALIZACIÓN GENERAL ───────────────────────────────────
+function inicializarModulos() {
+  lumActualizarTabla();
+  lumActualizarKPIs();
+  mantActualizarTabla();
+  coberturaActualizarTabla();
+  expansionActualizarTabla();
+  incActualizarContadores();
+
+  // Restaurar incidencias guardadas
+  const incs = DB.get('incidencias');
+  if(incs.length > 0) {
+    const lista = document.getElementById('lista-incidencias');
+    if(lista) {
+      const badgeMap = {alta:'badge-rojo',media:'badge-amarillo',baja:'badge-verde'};
+      lista.innerHTML = incs.slice().reverse().slice(0,20).map(inc=>`
+        <div class="incidencia-card">
+          <div class="incid-icon">${inc.icon||'🚨'}</div>
+          <div class="incid-body">
+            <div class="incid-title">${inc.tipo} — ${inc.poste}</div>
+            <div class="incid-meta">📍 ${inc.dir} · 🕐 ${inc.ahora}</div>
+          </div>
+          <div class="incid-status">
+            <span class="badge ${badgeMap[inc.prior]||'badge-gris'}">${inc.prior||'media'}</span>
+          </div>
+        </div>`).join('');
+    }
+  }
+
+  // Agregar botones faltantes donde no existen
+  _agregarBotonesGuardar();
+  _agregarHistorialSimulacion();
+}
+
+function _agregarBotonesGuardar() {
+  // Simulación — botón guardar
+  const btnGroupSim = document.querySelector('#page-simulacion .btn-group');
+  if(btnGroupSim && !btnGroupSim.querySelector('[onclick*="guardarSimulacion"]')) {
+    const btn = document.createElement('button');
+    btn.className = 'btn btn-success';
+    btn.onclick = guardarSimulacion;
+    btn.innerHTML = '💾 Guardar simulación';
+    btnGroupSim.appendChild(btn);
+  }
+
+  // Costos ETR — botón guardar
+  const totalTab = document.getElementById('tab-total');
+  if(totalTab && !totalTab.querySelector('[onclick*="guardarResultadosETR"]')) {
+    const btnGroup = document.createElement('div');
+    btnGroup.className = 'btn-group';
+    btnGroup.style.marginTop = '12px';
+    btnGroup.innerHTML = '<button class="btn btn-success" onclick="guardarResultadosETR()">💾 Guardar resultados ETR</button>';
+    totalTab.appendChild(btnGroup);
+  }
+
+  // Luminarias tab registrar — asignar IDs
+  const tabReg = document.getElementById('tab-registro');
+  if(tabReg) {
+    const inputs = tabReg.querySelectorAll('input[type="text"], input[type="number"], select');
+    const ids = ['lum-reg-codigo','lum-reg-tec','lum-reg-pot','lum-reg-flujo','lum-reg-irc','lum-reg-ip','lum-reg-anio','lum-reg-vida','lum-reg-zona','lum-reg-valor'];
+    inputs.forEach((inp, i) => { if(!inp.id && ids[i]) inp.id = ids[i]; });
+    // Asegurar que el botón Registrar llame a lumRegistrar
+    const btnReg = tabReg.querySelector('.btn-primary');
+    if(btnReg) btnReg.onclick = lumRegistrar;
+    const btnLimp = tabReg.querySelector('.btn-outline');
+    if(btnLimp) btnLimp.onclick = lumLimpiar;
+    // Asignar select de tecnología
+    const selTec = tabReg.querySelector('select');
+    if(selTec && !selTec.id) selTec.id = 'lum-reg-tec';
+  }
+}
+
+function _agregarHistorialSimulacion() {
+  const simPage = document.getElementById('page-simulacion');
+  if(simPage && !document.getElementById('sim-historial')) {
+    const div = document.createElement('div');
+    div.className = 'card';
+    div.innerHTML = `<div class="card-title">📋 Historial de Simulaciones Guardadas</div>
+      <div id="sim-historial" style="display:flex;flex-direction:column;gap:6px;">
+        <div style="color:#aaa;font-size:0.8rem;text-align:center;padding:10px;">Sin simulaciones guardadas aún.</div>
+      </div>`;
+    simPage.appendChild(div);
+    // Cargar historial
+    const sims = DB.get('simulaciones');
+    if(sims.length > 0) {
+      const h = document.getElementById('sim-historial');
+      h.innerHTML = sims.slice(-5).reverse().map(s=>`
+        <div style="padding:6px 10px;background:#F0F4F8;border-radius:5px;font-size:0.78rem;display:flex;justify-content:space-between;">
+          <span>${s.via} | Ancho:${s.ancho}m | Esp:${s.espaciado}m | ${s.fecha}</span>
+          <span><strong>${s.em} lux</strong> ${s.cumple}</span>
+        </div>`).join('');
+    }
+  }
+}
+
+// Ejecutar al cargar
+document.addEventListener('DOMContentLoaded', function() {
+  setTimeout(inicializarModulos, 600);
+});
+
 </script>
 </body>
 </html>
