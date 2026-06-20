@@ -158,9 +158,10 @@ document.addEventListener('DOMContentLoaded', function() {
   setTimeout(actualizarDashboard, 500);
 });
 document.addEventListener('DOMContentLoaded', function(){
-  const hoy = new Date().toISOString().split('T')[0];
+  const fechaHoy = new Date().toISOString().split('T')[0];
   const fin = document.getElementById('mora-fecha-fin');
-  if(fin) fin.value = hoy;
+  const fechaHoy2 = new Date().toISOString().split('T')[0];
+  if(fin) fin.value = fechaHoy2;
   const ccFecha = document.getElementById('cc-fecha-mp');
   if(ccFecha) ccFecha.value = hoy;
 });
@@ -2156,7 +2157,7 @@ function geoModalClose() {
 
 function geoModalOpen() {
  document.getElementById('geo-modal').style.display = 'flex';
-const hoy = new Date().toISOString().split('T')[0];
+const fechaHoy = new Date().toISOString().split('T')[0];
  if (!document.getElementById('ft-fecha-inst').value)
  document.getElementById('ft-fecha-inst').value = hoy;
  geoCalcUCAP();
