@@ -1,4 +1,13 @@
 
+// Restaurar MUNICIPIOS_DB al cargar
+(function() {
+  try {
+    var saved = localStorage.getItem('MUNICIPIOS_DB');
+    if(saved) window.MUNICIPIOS_DB = JSON.parse(saved);
+    else window.MUNICIPIOS_DB = {};
+  } catch(e) { window.MUNICIPIOS_DB = {}; }
+})();
+
 // ── NAVEGACIÓN PRINCIPAL ─────────────────────────────────
 function showPage(id) {
   // Ocultar todas las páginas
@@ -2750,44 +2759,97 @@ function muni_exportar() {
 }
 
 function muni_guardar() {
- const nombre = document.getElementById('mn-nombre')?.value?.trim();
- if(!nombre) { alert('Ingresa el nombre del municipio'); return; }
- const id_edit = document.getElementById('mn-nombre')?.dataset?.editId || ('M-'+Date.now());
- const cr = parseFloat(document.getElementById('mn-cr')?.value)||0;
- const wacc=0.1136, vida=20, idP=(parseFloat(document.getElementById('mn-id')?.value)||99)/100;
- const caanA = cr>0 ? cr*(wacc/(1-Math.pow(1+wacc,-vida))) : 0;
- const cinvA = caanA*idP;
- const cseeA = (parseFloat(document.getElementById('mn-csee')?.value)||0)*12;
- const caomA = cr*0.074*idP;
- const cotrA = (cinvA+caomA)*0.08;
- const ctmaxA = cseeA+cinvA+caomA+cotrA;
- const recaudoA = (parseFloat(document.getElementById('mn-recaudo')?.value)||0)*12;
+  // Leer todos los campos del modal
+  function getV(id) {
+    var el = document.getElementById(id);
+    return el ? el.value.trim() : '';
+  }
+  function getN(id) {
+    var el = document.getElementById(id);
+    return el ? parseFloat(el.value) || 0 : 0;
+  }
 
- MUNICIPIOS_DB[id_edit] = {
- id: id_edit,
- nombre, dpto: document.getElementById('mn-dpto')?.value||'',
- nit: document.getElementById('mn-nit')?.value||'',
- dane: document.getElementById('mn-dane')?.value||'',
- secretario: document.getElementById('mn-secretario')?.value||'',
- alcalde: document.getElementById('mn-alcalde')?.value||'',
- vigencia: document.getElementById('mn-vigencia')?.value||'2024-2027',
- comercializadora: document.getElementById('mn-comer')?.value||'',
- luminarias: parseFloat(document.getElementById('mn-luminarias')?.value)||0,
- cr_total: cr,
- csee_mes: parseFloat(document.getElementById('mn-csee')?.value)||0,
- tarifa_kwh: parseFloat(document.getElementById('mn-tarifa')?.value)||890,
- recaudo_mes: parseFloat(document.getElementById('mn-recaudo')?.value)||0,
- id_pct: idP,
- ctmax_anual: ctmaxA,
- recaudo_anual: recaudoA,
- cumple_art351: recaudoA <= ctmaxA,
- ts: new Date().toISOString(),
- };
- localStorage.setItem('MUNICIPIOS_DB', JSON.stringify(MUNICIPIOS_DB));
- document.getElementById('muni-modal').style.display='none';
- muni_renderLista();
- muni_renderComparativo();
+  var nombre = getV('mn-nombre');
+  if(!nombre) {
+    alert('⚠️ Ingresa el nombre del municipio');
+    return;
+  }
+
+  var dpto       = getV('mn-dpto');
+  var nit        = getV('mn-nit');
+  var dane       = getV('mn-dane');
+  var secretario = getV('mn-secretario');
+  var alcalde    = getV('mn-alcalde');
+  var vigencia   = getV('mn-vigencia') || '2024-2027';
+  var comer      = getV('mn-comer');
+  var luminarias = getN('mn-luminarias');
+  var cr         = getN('mn-cr');
+  var csee       = getN('mn-csee');
+  var tarifa     = getN('mn-tarifa') || 890;
+  var recaudo    = getN('mn-recaudo');
+  var idPct      = (getN('mn-id') || 99) / 100;
+
+  // Calcular CTMAX
+  var wacc = 0.1136;
+  var vida = 20;
+  var caanA = cr > 0 ? cr * (wacc / (1 - Math.pow(1+wacc, -vida))) : 0;
+  var cinvA = caanA * idPct;
+  var cseeA = csee * 12;
+  var caomA = cr * 0.074 * idPct;
+  var cotrA = (cinvA + caomA) * 0.08;
+  var ctmaxA = cseeA + cinvA + caomA + cotrA;
+  var recaudoA = recaudo * 12;
+  var cumple = recaudoA <= ctmaxA;
+
+  // Obtener o crear ID
+  var elNombre = document.getElementById('mn-nombre');
+  var idEdit = (elNombre && elNombre.dataset && elNombre.dataset.editId) ? elNombre.dataset.editId : ('M-' + Date.now());
+
+  var municipio = {
+    id: idEdit,
+    nombre: nombre,
+    dpto: dpto,
+    nit: nit,
+    dane: dane,
+    secretario: secretario,
+    alcalde: alcalde,
+    vigencia: vigencia,
+    comercializadora: comer,
+    luminarias: luminarias,
+    cr_total: cr,
+    csee_mes: csee,
+    tarifa_kwh: tarifa,
+    recaudo_mes: recaudo,
+    id_pct: idPct,
+    ctmax_anual: ctmaxA,
+    recaudo_anual: recaudoA,
+    cumple_art351: cumple,
+    ts: new Date().toISOString()
+  };
+
+  // Guardar en memoria y localStorage
+  if(!window.MUNICIPIOS_DB) window.MUNICIPIOS_DB = {};
+  window.MUNICIPIOS_DB[idEdit] = municipio;
+  try {
+    localStorage.setItem('MUNICIPIOS_DB', JSON.stringify(window.MUNICIPIOS_DB));
+  } catch(e) {}
+
+  // Cerrar modal
+  var modal = document.getElementById('muni-modal');
+  if(modal) modal.style.display = 'none';
+
+  // Actualizar UI
+  if(typeof muni_renderLista === 'function') muni_renderLista();
+  if(typeof muni_renderComparativo === 'function') muni_renderComparativo();
+
+  // Notificar
+  if(typeof showToast === 'function') {
+    showToast('✅ Municipio ' + nombre + ' guardado correctamente', 'success');
+  } else {
+    alert('✅ Municipio ' + nombre + ' guardado correctamente');
+  }
 }
+
 
 function muni_informe_regional() {
  const munis=Object.values(window.MUNICIPIOS_DB||{});
