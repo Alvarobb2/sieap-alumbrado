@@ -648,6 +648,10 @@
     <span class="sidebar-icon">⚖️</span> Tributario IAP
   </a>
 
+    <a class="sidebar-item" onclick="showPage('calculadoras')" href="#">
+    <span class="sidebar-icon">🧮</span> Calculadoras SIEAP
+  </a>
+
   <div class="sidebar-section">Modelos Avanzados</div>
   <a class="sidebar-item" onclick="showPage('sim-tarifas')" href="#">
     <span class="sidebar-icon">💹</span> Simulación Tarifas IAP
@@ -2984,6 +2988,304 @@
       <div class="btn-group" style="margin-top:12px;">
         <button class="btn btn-primary" onclick="descargarModeloAcuerdo()">📄 Descargar Modelo Completo Word</button>
         <button class="btn btn-outline" onclick="window.print()">🖨️ Imprimir</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===================== CALCULADORAS AVANZADAS SIEAP ===================== -->
+<div id="page-calculadoras" class="page">
+  <div class="page-header" style="background:linear-gradient(135deg,#0a2a0a,#1a6a1a);">
+    <span class="page-header-icon">🧮</span>
+    <div>
+      <h1>Centro de Calculadoras SIEAP</h1>
+      <p>Liquidación IAP · Mora y sanciones ET · Red eléctrica · RETILAP · Costos unitarios · Modernización LED · IPC/IPP</p>
+    </div>
+  </div>
+
+  <div class="tabs">
+    <button class="tab-btn active" onclick="showTab(this,'calc-iap')">💰 Liquidación IAP</button>
+    <button class="tab-btn" onclick="showTab(this,'calc-mora')">⚖️ Mora y Sanciones</button>
+    <button class="tab-btn" onclick="showTab(this,'calc-cobro')">📋 Cobro Coactivo</button>
+    <button class="tab-btn" onclick="showTab(this,'calc-red')">⚡ Red Eléctrica</button>
+    <button class="tab-btn" onclick="showTab(this,'calc-retilap')">🔆 RETILAP §560</button>
+    <button class="tab-btn" onclick="showTab(this,'calc-costos')">📊 Costos Unitarios</button>
+    <button class="tab-btn" onclick="showTab(this,'calc-indices')">📈 IPC/IPP ETR</button>
+    <button class="tab-btn" onclick="showTab(this,'calc-roi')">💡 ROI LED</button>
+  </div>
+
+  <!-- ── TAB 1: LIQUIDACIÓN IAP INDIVIDUAL ── -->
+  <div id="calc-iap" class="tab-panel active" style="background:white;padding:20px;border:1px solid #D0DDE8;border-top:none;border-radius:0 0 10px 10px;">
+    <div class="grid-2">
+      <div>
+        <div class="card-title">💰 Liquidación IAP por Contribuyente</div>
+        <div class="alert alert-info" style="margin-bottom:12px;">Art. 338 CP + CE Sent. 22161/2019: Base gravable debe ser proporcional al beneficio.</div>
+        <div class="form-row">
+          <div class="form-group"><label>Nombre / Razón social</label><input type="text" id="liap-nombre" placeholder="Nombre del contribuyente"></div>
+          <div class="form-group"><label>NIT / Cédula</label><input type="text" id="liap-nit" placeholder="NIT o cédula"></div>
+          <div class="form-group"><label>Estrato / Sector</label>
+            <select id="liap-sector" onchange="calcLiqIAP()">
+              <option value="e1">Estrato 1</option><option value="e2">Estrato 2</option>
+              <option value="e3" selected>Estrato 3</option><option value="e4">Estrato 4</option>
+              <option value="e5">Estrato 5</option><option value="e6">Estrato 6</option>
+              <option value="com">Comercial</option><option value="ind">Industrial</option>
+              <option value="of">Oficial (exento)</option>
+            </select>
+          </div>
+          <div class="form-group"><label>Consumo energía (kWh/mes)</label><input type="number" id="liap-kwh" placeholder="180" oninput="calcLiqIAP()"></div>
+          <div class="form-group"><label>Tarifa energía ($/kWh)</label><input type="number" id="liap-tarifa-e" placeholder="890" oninput="calcLiqIAP()"></div>
+          <div class="form-group"><label>Tarifa IAP aplicable</label><input type="number" id="liap-tasa" placeholder="5.5" step="0.1" oninput="calcLiqIAP()"></div>
+          <div class="form-group"><label>Método</label>
+            <select id="liap-metodo" onchange="calcLiqIAP()">
+              <option value="pct">% sobre factura energía</option>
+              <option value="kwh">$ por kWh</option>
+              <option value="fijo">Valor fijo mensual</option>
+            </select>
+          </div>
+          <div class="form-group"><label>Período(s) a liquidar (meses)</label><input type="number" id="liap-periodos" value="1" min="1" oninput="calcLiqIAP()"></div>
+        </div>
+        <div class="btn-group">
+          <button class="btn btn-primary" onclick="calcLiqIAP()">🧮 Calcular</button>
+          <button class="btn btn-success" onclick="descargarLiqIAP()">📄 Generar liquidación</button>
+          <button class="btn btn-outline" onclick="limpiarLiq()">🗑️ Limpiar</button>
+        </div>
+      </div>
+      <div id="res-liap" style="display:flex;flex-direction:column;gap:10px;margin-top:4px;">
+        <div style="text-align:center;padding:40px;color:#aaa;">Ingresa los datos para calcular</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── TAB 2: MORA Y SANCIONES ── -->
+  <div id="calc-mora" class="tab-panel" style="display:none;background:white;padding:20px;border:1px solid #D0DDE8;border-top:none;border-radius:0 0 10px 10px;">
+    <div class="grid-2">
+      <div>
+        <div class="card-title">⚖️ Intereses de Mora y Sanciones ET</div>
+        <div class="alert alert-warning" style="margin-bottom:12px;">Art. 634 ET: Intereses moratorios = tasa de usura SFC. Art. 817 ET: Prescripción 5 años desde causación.</div>
+        <div class="tabs" style="margin-bottom:14px;">
+          <button class="tab-btn active" onclick="showTab(this,'mora-int')">Intereses mora</button>
+          <button class="tab-btn" onclick="showTab(this,'mora-sanc')">Sanciones</button>
+          <button class="tab-btn" onclick="showTab(this,'mora-presc')">Prescripción</button>
+        </div>
+        <div id="mora-int" class="tab-panel active">
+          <div class="form-row">
+            <div class="form-group"><label>Capital IAP en mora (COP)</label><input type="number" id="mora-capital" placeholder="500000" oninput="calcMora()"></div>
+            <div class="form-group"><label>Fecha de causación</label><input type="date" id="mora-fecha-ini" oninput="calcMora()"></div>
+            <div class="form-group"><label>Fecha de cálculo</label><input type="date" id="mora-fecha-fin" oninput="calcMora()"></div>
+            <div class="form-group"><label>Tasa usura SFC vigente (% EA)</label><input type="number" id="mora-tasa" placeholder="30.48" step="0.01" oninput="calcMora()"></div>
+          </div>
+          <div id="res-mora"></div>
+        </div>
+        <div id="mora-sanc" class="tab-panel" style="display:none;">
+          <div class="form-row">
+            <div class="form-group"><label>Tipo de sanción</label>
+              <select id="sanc-tipo" onchange="calcSancion()">
+                <option value="nodecl">No declarar — Art. 643 ET (10% ingresos)</option>
+                <option value="inexact">Inexactitud — Art. 647 ET (100% diferencia)</option>
+                <option value="extemp">Extemporaneidad — Art. 641 ET</option>
+                <option value="nocobro">No cobrar — Art. 668 ET</option>
+              </select>
+            </div>
+            <div class="form-group"><label>Base de la sanción (COP)</label><input type="number" id="sanc-base" placeholder="0" oninput="calcSancion()"></div>
+            <div class="form-group"><label>Meses de retardo (extemporaneidad)</label><input type="number" id="sanc-meses" placeholder="0" oninput="calcSancion()"></div>
+          </div>
+          <div id="res-sancion"></div>
+        </div>
+        <div id="mora-presc" class="tab-panel" style="display:none;">
+          <div class="form-row">
+            <div class="form-group"><label>Fecha de causación del IAP</label><input type="date" id="presc-fecha" oninput="calcPrescripcion()"></div>
+            <div class="form-group"><label>¿Ha habido acto de cobro?</label>
+              <select id="presc-interrupcion" onchange="calcPrescripcion()">
+                <option value="no">No — sin interrupciones</option>
+                <option value="si">Sí — mandamiento de pago</option>
+              </select>
+            </div>
+            <div class="form-group"><label>Fecha del acto interruptivo</label><input type="date" id="presc-fecha-int" oninput="calcPrescripcion()"></div>
+          </div>
+          <div id="res-prescripcion"></div>
+        </div>
+      </div>
+      <div>
+        <div class="card-title">📋 Marco legal sanciones IAP</div>
+        <div style="display:flex;flex-direction:column;gap:6px;font-size:0.8rem;">
+          <div style="padding:8px 12px;background:#FFF3CD;border-left:3px solid #E87722;border-radius:0 6px 6px 0;"><strong>Art. 634 ET:</strong> Intereses moratorios = tasa de usura certificada por Superfinanciera. Se liquidan desde el vencimiento hasta el pago.</div>
+          <div style="padding:8px 12px;background:#F8D7DA;border-left:3px solid #CC2200;border-radius:0 6px 6px 0;"><strong>Art. 817 ET:</strong> Prescripción de la acción de cobro: 5 años desde ejecutoria del acto o vencimiento del plazo. Interrumpible por mandamiento de pago.</div>
+          <div style="padding:8px 12px;background:#F8D7DA;border-left:3px solid #CC2200;border-radius:0 6px 6px 0;"><strong>Art. 643 ET:</strong> Sanción por no declarar = 10% ingresos brutos del período no declarado. Mínimo = sanción mínima DIAN actualizada.</div>
+          <div style="padding:8px 12px;background:#F8D7DA;border-left:3px solid #CC2200;border-radius:0 6px 6px 0;"><strong>Art. 647 ET:</strong> Sanción inexactitud = 100% de la diferencia entre lo declarado y lo correcto. Reducible con corrección voluntaria.</div>
+          <div style="padding:8px 12px;background:#D4EDDA;border-left:3px solid #2E8B34;border-radius:0 6px 6px 0;"><strong>Reducción sanciones:</strong> Art. 640 ET: -50% si corrige antes de auto de inspección. -25% si corrige después.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── TAB 3: COBRO COACTIVO ── -->
+  <div id="calc-cobro" class="tab-panel" style="display:none;background:white;padding:20px;border:1px solid #D0DDE8;border-top:none;border-radius:0 0 10px 10px;">
+    <div class="grid-2">
+      <div>
+        <div class="card-title">📋 Liquidación Cobro Coactivo IAP</div>
+        <div class="alert alert-danger" style="margin-bottom:12px;">Arts. 823-843 ET: Proceso administrativo de cobro coactivo. Competencia: Secretaría de Hacienda.</div>
+        <div class="form-row">
+          <div class="form-group"><label>Contribuyente</label><input type="text" id="cc-nombre" placeholder="Nombre"></div>
+          <div class="form-group"><label>NIT / Cédula</label><input type="text" id="cc-nit" placeholder=""></div>
+          <div class="form-group"><label>Capital IAP (COP)</label><input type="number" id="cc-capital" placeholder="0" oninput="calcCobroCoactivo()"></div>
+          <div class="form-group"><label>Intereses de mora (COP)</label><input type="number" id="cc-intereses" placeholder="0" oninput="calcCobroCoactivo()"></div>
+          <div class="form-group"><label>Sanciones (COP)</label><input type="number" id="cc-sanciones" placeholder="0" oninput="calcCobroCoactivo()"></div>
+          <div class="form-group"><label>Gastos de cobro estimados (COP)</label><input type="number" id="cc-gastos" placeholder="0" oninput="calcCobroCoactivo()"></div>
+          <div class="form-group"><label>Fecha mandamiento de pago</label><input type="date" id="cc-fecha-mp" oninput="calcCobroCoactivo()"></div>
+          <div class="form-group"><label>Acuerdo de pago (cuotas)</label><input type="number" id="cc-cuotas" placeholder="0" oninput="calcCobroCoactivo()"></div>
+        </div>
+        <div class="btn-group">
+          <button class="btn btn-danger" onclick="calcCobroCoactivo()">🧮 Calcular deuda total</button>
+          <button class="btn btn-primary" onclick="generarMandamientoPago()">📄 Mandamiento de Pago</button>
+          <button class="btn btn-success" onclick="generarAcuerdoPago()">📋 Acuerdo de Pago</button>
+        </div>
+      </div>
+      <div id="res-cobro-coactivo" style="margin-top:4px;">
+        <div style="text-align:center;padding:40px;color:#aaa;">Ingresa los datos para calcular</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── TAB 4: RED ELÉCTRICA ── -->
+  <div id="calc-red" class="tab-panel" style="display:none;background:white;padding:20px;border:1px solid #D0DDE8;border-top:none;border-radius:0 0 10px 10px;">
+    <div class="grid-2">
+      <div>
+        <div class="card-title">⚡ Dimensionamiento Red Eléctrica SALP</div>
+        <div class="form-row">
+          <div class="form-group"><label>Potencia total circuito (W)</label><input type="number" id="red-potencia" placeholder="5000" oninput="calcRed()"></div>
+          <div class="form-group"><label>Tensión nominal (V)</label>
+            <select id="red-tension" onchange="calcRed()"><option value="120">120V</option><option value="240" selected>240V</option><option value="13200">13.2kV</option></select>
+          </div>
+          <div class="form-group"><label>Factor de potencia</label><input type="number" id="red-fp" placeholder="0.95" step="0.01" oninput="calcRed()"></div>
+          <div class="form-group"><label>Longitud del circuito (m)</label><input type="number" id="red-longitud" placeholder="200" oninput="calcRed()"></div>
+          <div class="form-group"><label>Caída de tensión máxima (%)</label><input type="number" id="red-caida-max" placeholder="3" step="0.5" oninput="calcRed()"></div>
+          <div class="form-group"><label>Material conductor</label>
+            <select id="red-material" onchange="calcRed()"><option value="cu">Cobre</option><option value="al">Aluminio</option></select>
+          </div>
+          <div class="form-group"><label>Temperatura ambiente (°C)</label><input type="number" id="red-temp" placeholder="35" oninput="calcRed()"></div>
+          <div class="form-group"><label>N° fases</label>
+            <select id="red-fases" onchange="calcRed()"><option value="1">Monofásico</option><option value="3">Trifásico</option></select>
+          </div>
+        </div>
+        <button class="btn btn-primary" onclick="calcRed()">🧮 Calcular dimensionamiento</button>
+      </div>
+      <div id="res-red" style="margin-top:4px;">
+        <div style="text-align:center;padding:40px;color:#aaa;">Ingresa los datos para calcular</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── TAB 5: RETILAP §560 UNIFORMIDAD ── -->
+  <div id="calc-retilap" class="tab-panel" style="display:none;background:white;padding:20px;border:1px solid #D0DDE8;border-top:none;border-radius:0 0 10px 10px;">
+    <div class="grid-2">
+      <div>
+        <div class="card-title">🔆 Calculadora Fotométrica RETILAP §560</div>
+        <div class="form-row">
+          <div class="form-group"><label>Clase de iluminación vial</label>
+            <select id="foto-clase" onchange="calcFotometria()">
+              <option value="M1">M1 — Expresa (>80km/h)</option>
+              <option value="M2">M2 — Arterial (50-80km/h)</option>
+              <option value="M3" selected>M3 — Colectora (30-50km/h)</option>
+              <option value="M4">M4 — Local (<30km/h)</option>
+              <option value="P1">P1 — Peatonal principal</option>
+              <option value="P2">P2 — Peatonal secundaria</option>
+            </select>
+          </div>
+          <div class="form-group"><label>Flujo luminoso lámpara (lm)</label><input type="number" id="foto-flujo" placeholder="14500" oninput="calcFotometria()"></div>
+          <div class="form-group"><label>Factor de utilización (Fu)</label><input type="number" id="foto-fu" placeholder="0.72" step="0.01" oninput="calcFotometria()"></div>
+          <div class="form-group"><label>Factor mantenimiento (Fm)</label><input type="number" id="foto-fm" placeholder="0.80" step="0.01" oninput="calcFotometria()"></div>
+          <div class="form-group"><label>Ancho de calzada (m)</label><input type="number" id="foto-ancho" placeholder="7" oninput="calcFotometria()"></div>
+          <div class="form-group"><label>Espaciado entre luminarias (m)</label><input type="number" id="foto-espaciado" placeholder="32" oninput="calcFotometria()"></div>
+          <div class="form-group"><label>E mínima medida (lux)</label><input type="number" id="foto-emin" placeholder="0" oninput="calcFotometria()"></div>
+          <div class="form-group"><label>E máxima medida (lux)</label><input type="number" id="foto-emax" placeholder="0" oninput="calcFotometria()"></div>
+          <div class="form-group"><label>Potencia luminaria (W)</label><input type="number" id="foto-potencia" placeholder="100" oninput="calcFotometria()"></div>
+        </div>
+        <button class="btn btn-primary" onclick="calcFotometria()">🧮 Verificar RETILAP</button>
+      </div>
+      <div id="res-fotometria" style="margin-top:4px;">
+        <div style="text-align:center;padding:40px;color:#aaa;">Ingresa los datos para verificar</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── TAB 6: COSTOS UNITARIOS ── -->
+  <div id="calc-costos" class="tab-panel" style="display:none;background:white;padding:20px;border:1px solid #D0DDE8;border-top:none;border-radius:0 0 10px 10px;">
+    <div class="grid-2">
+      <div>
+        <div class="card-title">📊 Costo Unitario por Punto de Luz — CREG 101013/2022</div>
+        <div class="form-row">
+          <div class="form-group"><label>N° total luminarias SALP</label><input type="number" id="cu-lum" placeholder="0" oninput="calcCostoUnitario()"></div>
+          <div class="form-group"><label>CSEE mensual total (COP)</label><input type="number" id="cu-csee" placeholder="0" oninput="calcCostoUnitario()"></div>
+          <div class="form-group"><label>CINV mensual total (COP)</label><input type="number" id="cu-cinv" placeholder="0" oninput="calcCostoUnitario()"></div>
+          <div class="form-group"><label>CAOM mensual total (COP)</label><input type="number" id="cu-caom" placeholder="0" oninput="calcCostoUnitario()"></div>
+          <div class="form-group"><label>COTR mensual total (COP)</label><input type="number" id="cu-cotr" placeholder="0" oninput="calcCostoUnitario()"></div>
+          <div class="form-group"><label>Valor activo luminaria (COP)</label><input type="number" id="cu-activo" placeholder="0" oninput="calcCostoUnitario()"></div>
+          <div class="form-group"><label>Vida útil (años)</label><input type="number" id="cu-vida" placeholder="25" oninput="calcCostoUnitario()"></div>
+        </div>
+        <button class="btn btn-primary" onclick="calcCostoUnitario()">🧮 Calcular costo unitario</button>
+      </div>
+      <div id="res-costo-unitario" style="margin-top:4px;">
+        <div style="text-align:center;padding:40px;color:#aaa;">Ingresa los datos para calcular</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── TAB 7: IPC/IPP ACTUALIZACIÓN ETR ── -->
+  <div id="calc-indices" class="tab-panel" style="display:none;background:white;padding:20px;border:1px solid #D0DDE8;border-top:none;border-radius:0 0 10px 10px;">
+    <div class="grid-2">
+      <div>
+        <div class="card-title">📈 Actualización ETR con IPC/IPP — DANE</div>
+        <div class="alert alert-info" style="margin-bottom:12px;">Res. CREG 101013/2022: CSEE se actualiza con IPP. CAOM y COTR se actualizan con IPC.</div>
+        <div class="form-row">
+          <div class="form-group"><label>Año base del ETR</label><input type="number" id="idx-anio-base" placeholder="2024" oninput="calcActualizacion()"></div>
+          <div class="form-group"><label>Año de actualización</label><input type="number" id="idx-anio-act" placeholder="2026" oninput="calcActualizacion()"></div>
+          <div class="form-group"><label>CSEE base (COP/mes)</label><input type="number" id="idx-csee" placeholder="0" oninput="calcActualizacion()"></div>
+          <div class="form-group"><label>CINV base (COP/mes)</label><input type="number" id="idx-cinv" placeholder="0" oninput="calcActualizacion()"></div>
+          <div class="form-group"><label>CAOM base (COP/mes)</label><input type="number" id="idx-caom" placeholder="0" oninput="calcActualizacion()"></div>
+          <div class="form-group"><label>COTR base (COP/mes)</label><input type="number" id="idx-cotr" placeholder="0" oninput="calcActualizacion()"></div>
+          <div class="form-group"><label>IPC anual promedio (%)</label><input type="number" id="idx-ipc" placeholder="6.2" step="0.1" oninput="calcActualizacion()"></div>
+          <div class="form-group"><label>IPP anual promedio (%)</label><input type="number" id="idx-ipp" placeholder="8.5" step="0.1" oninput="calcActualizacion()"></div>
+          <div class="form-group"><label>FAOML año actualización</label>
+            <select id="idx-faom" onchange="calcActualizacion()">
+              <option value="0.086">2024 → 0.086</option>
+              <option value="0.080">2025 → 0.080</option>
+              <option value="0.074" selected>2026 → 0.074</option>
+              <option value="0.069">2027 → 0.069</option>
+              <option value="0.063">2028+ → 0.063</option>
+            </select>
+          </div>
+        </div>
+        <button class="btn btn-primary" onclick="calcActualizacion()">🧮 Actualizar ETR</button>
+        <button class="btn btn-success" onclick="exportarActualizacion()">📄 Exportar actualización</button>
+      </div>
+      <div id="res-actualizacion" style="margin-top:4px;">
+        <div style="text-align:center;padding:40px;color:#aaa;">Ingresa los datos para actualizar</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── TAB 8: ROI MODERNIZACIÓN LED ── -->
+  <div id="calc-roi" class="tab-panel" style="display:none;background:white;padding:20px;border:1px solid #D0DDE8;border-top:none;border-radius:0 0 10px 10px;">
+    <div class="grid-2">
+      <div>
+        <div class="card-title">💡 ROI Modernización LED vs HID/Mercurio</div>
+        <div class="form-row">
+          <div class="form-group"><label>N° luminarias a modernizar</label><input type="number" id="roi-cant" placeholder="0" oninput="calcROI()"></div>
+          <div class="form-group"><label>Potencia actual (W/lum)</label><input type="number" id="roi-pot-act" placeholder="250" oninput="calcROI()"></div>
+          <div class="form-group"><label>Potencia LED propuesta (W/lum)</label><input type="number" id="roi-pot-led" placeholder="100" oninput="calcROI()"></div>
+          <div class="form-group"><label>Horas operación/día</label><input type="number" id="roi-horas" placeholder="12" oninput="calcROI()"></div>
+          <div class="form-group"><label>Tarifa energía ($/kWh)</label><input type="number" id="roi-tarifa" placeholder="890" oninput="calcROI()"></div>
+          <div class="form-group"><label>Costo luminaria LED (COP)</label><input type="number" id="roi-costo-led" placeholder="850000" oninput="calcROI()"></div>
+          <div class="form-group"><label>Costo instalación/lum (COP)</label><input type="number" id="roi-inst" placeholder="150000" oninput="calcROI()"></div>
+          <div class="form-group"><label>Vida útil LED (años)</label><input type="number" id="roi-vida" placeholder="25" oninput="calcROI()"></div>
+          <div class="form-group"><label>WACC / Tasa descuento (%)</label><input type="number" id="roi-wacc" placeholder="11.36" step="0.01" oninput="calcROI()"></div>
+          <div class="form-group"><label>Crecimiento tarifa energía (%/año)</label><input type="number" id="roi-crec-e" placeholder="8.5" step="0.1" oninput="calcROI()"></div>
+        </div>
+        <button class="btn btn-primary" onclick="calcROI()">🧮 Calcular ROI</button>
+        <button class="btn btn-success" onclick="exportarROI()">📄 Exportar análisis</button>
+      </div>
+      <div id="res-roi" style="margin-top:4px;">
+        <div style="text-align:center;padding:40px;color:#aaa;">Ingresa los datos para calcular</div>
       </div>
     </div>
   </div>
@@ -6049,6 +6351,466 @@ function finGenerarWord() { generarWordETR(); }
 
 // 18. IMPRIMIR
 function imprimirETR() { window.print(); }
+
+
+// SIEAP — MOTOR DE CALCULADORAS AVANZADAS
+
+function fmtCOP(n){ return '$'+Math.round(n).toLocaleString('es-CO'); }
+function gV(id){ const e=document.getElementById(id); return e?parseFloat(e.value)||0:0; }
+function gS(id){ const e=document.getElementById(id); return e?e.value:''; }
+function setRes(id, html){ const e=document.getElementById(id); if(e) e.innerHTML=html; }
+
+function boxAzul(titulo, items) {
+  return `<div style="background:linear-gradient(135deg,#003366,#0055A5);color:white;border-radius:10px;padding:16px;margin-bottom:10px;">
+    <div style="font-weight:700;color:#FFD700;margin-bottom:10px;font-size:0.9rem;">${titulo}</div>
+    <div style="display:flex;flex-direction:column;gap:6px;">
+    ${items.map(([k,v,color])=>`<div style="display:flex;justify-content:space-between;padding:5px 8px;background:rgba(255,255,255,0.08);border-radius:5px;">
+      <span style="color:#A8C4E0;font-size:0.8rem;">${k}</span>
+      <strong style="color:${color||'#FFD700'};font-size:0.82rem;">${v}</strong>
+    </div>`).join('')}
+    </div></div>`;
+}
+
+function alertBox(tipo, texto) {
+  const colors = {success:'#D4EDDA:#1a7a2a', warning:'#FFF3CD:#856404', danger:'#F8D7DA:#721c24', info:'#CCE5FF:#004085'};
+  const [bg, color] = (colors[tipo]||'#F0F4F8:#333').split(':');
+  return `<div style="background:${bg};border-radius:8px;padding:12px 16px;font-size:0.82rem;color:${color};border-left:4px solid ${color};">${texto}</div>`;
+}
+
+// ── 1. LIQUIDACIÓN IAP ────────────────────────────────────────
+function calcLiqIAP() {
+  const sector = gS('liap-sector');
+  const kwh = gV('liap-kwh');
+  const tarifaE = gV('liap-tarifa-e');
+  const tasa = gV('liap-tasa');
+  const metodo = gS('liap-metodo');
+  const periodos = gV('liap-periodos') || 1;
+
+  if(!kwh && !tarifaE) { setRes('res-liap','<div style="text-align:center;padding:20px;color:#aaa;">Ingresa consumo y tarifa</div>'); return; }
+  if(sector === 'of') {
+    setRes('res-liap', alertBox('info','⚖️ Sector Oficial — Exento de IAP según Acuerdo Municipal.<br>Base: Art. 294 CP + MME Concepto 1-2019-014567.'));
+    return;
+  }
+
+  const factura = kwh * tarifaE;
+  let iap;
+  if(metodo === 'pct') iap = factura * (tasa/100);
+  else if(metodo === 'kwh') iap = kwh * tasa;
+  else iap = tasa;
+
+  const totalPeriodos = iap * periodos;
+  const anual = iap * 12;
+
+  setRes('res-liap', boxAzul('💰 LIQUIDACIÓN IAP', [
+    ['Consumo energía', kwh.toLocaleString('es-CO')+' kWh', 'white'],
+    ['Factura energía', fmtCOP(factura), 'white'],
+    ['Tarifa IAP aplicada', tasa+(metodo==='pct'?'%':metodo==='kwh'?' $/kWh':' $ fijo'), '#A8C4E0'],
+    ['IAP mensual', fmtCOP(iap), '#FFD700'],
+    ['Total '+periodos+' período(s)', fmtCOP(totalPeriodos), '#2ECC71'],
+    ['Proyección anual', fmtCOP(anual), '#A8C4E0'],
+  ]) + alertBox('info','Base: Art. 338 CP + CE Sent. Unif. 22161/2019 + Art. 351 Ley 1819/2016'));
+}
+
+function descargarLiqIAP() {
+  calcLiqIAP();
+  const nombre = gS('liap-nombre') || 'Contribuyente';
+  const nit = gS('liap-nit') || '—';
+  const kwh = gV('liap-kwh');
+  const tarifaE = gV('liap-tarifa-e');
+  const tasa = gV('liap-tasa');
+  const metodo = gS('liap-metodo');
+  const periodos = gV('liap-periodos') || 1;
+  const factura = kwh * tarifaE;
+  let iap = metodo==='pct' ? factura*(tasa/100) : metodo==='kwh' ? kwh*tasa : tasa;
+  const muni = document.getElementById('etr-municipio')?.value || 'Municipio';
+  const txt = `LIQUIDACIÓN IMPUESTO DE ALUMBRADO PÚBLICO\nMunicipio: ${muni} | FUCDESCOC — NIT 900.517.521-0\nFecha: ${new Date().toLocaleDateString('es-CO')}\n\nCONTRIBUYENTE: ${nombre}\nNIT/CC: ${nit}\nConsumo: ${kwh} kWh/mes | Tarifa energía: $${tarifaE}/kWh\nTarifa IAP: ${tasa}${metodo==='pct'?'%':' $/kWh'}\n\nIAP MENSUAL: ${fmtCOP(iap)}\nTOTAL ${periodos} PERÍODO(S): ${fmtCOP(iap*periodos)}\n\nBase legal: Art. 338 CP, Ley 97/1913, Ley 1819/2016 Art.349-353, CE Sent. 22161/2019`;
+  if(window.descargarArchivo) descargarArchivo(txt, 'Liquidacion_IAP_'+nombre+'.txt', 'text/plain;charset=utf-8');
+  else alert(txt);
+}
+
+function limpiarLiq() {
+  ['liap-nombre','liap-nit','liap-kwh','liap-tarifa-e','liap-tasa'].forEach(id=>{
+    const e=document.getElementById(id); if(e) e.value='';
+  });
+  setRes('res-liap','<div style="text-align:center;padding:20px;color:#aaa;">Ingresa los datos para calcular</div>');
+}
+
+// ── 2. INTERESES DE MORA ──────────────────────────────────────
+function calcMora() {
+  const capital = gV('mora-capital');
+  const fechaIni = gS('mora-fecha-ini');
+  const fechaFin = gS('mora-fecha-fin');
+  const tasa = gV('mora-tasa');
+  if(!capital || !fechaIni || !fechaFin || !tasa) return;
+
+  const d1 = new Date(fechaIni);
+  const d2 = new Date(fechaFin);
+  const dias = Math.max(0, Math.floor((d2-d1)/(1000*60*60*24)));
+  const tasaDiaria = Math.pow(1+tasa/100, 1/365) - 1;
+  const intereses = capital * (Math.pow(1+tasaDiaria, dias) - 1);
+  const total = capital + intereses;
+
+  setRes('res-mora', boxAzul('⚖️ INTERESES DE MORA — Art. 634 ET', [
+    ['Capital en mora', fmtCOP(capital), 'white'],
+    ['Días en mora', dias.toLocaleString('es-CO'), '#A8C4E0'],
+    ['Tasa usura SFC (EA)', tasa.toFixed(2)+'%', '#A8C4E0'],
+    ['Tasa diaria equivalente', (tasaDiaria*100).toFixed(6)+'%', '#A8C4E0'],
+    ['Intereses de mora', fmtCOP(intereses), '#FFD700'],
+    ['TOTAL A PAGAR', fmtCOP(total), '#2ECC71'],
+  ]) + alertBox('warning','Art. 634 ET: Intereses = tasa de usura certificada por SFC, liquidada diariamente desde el vencimiento.'));
+}
+
+// ── 3. SANCIONES ─────────────────────────────────────────────
+function calcSancion() {
+  const tipo = gS('sanc-tipo');
+  const base = gV('sanc-base');
+  const meses = gV('sanc-meses');
+  if(!base && tipo !== 'nodecl') return;
+
+  let sancion = 0, articulo = '', formula = '';
+
+  if(tipo === 'nodecl') {
+    sancion = base * 0.10;
+    articulo = 'Art. 643 ET';
+    formula = '10% de los ingresos brutos del período';
+    const minSancion = 1141000; // UVT 2024 aprox
+    if(sancion < minSancion) { sancion = minSancion; formula += ' (mínimo sancionatorio)'; }
+  } else if(tipo === 'inexact') {
+    sancion = base * 1.00;
+    articulo = 'Art. 647 ET';
+    formula = '100% de la diferencia';
+  } else if(tipo === 'extemp') {
+    const pct = Math.min(meses * 0.05, 1.0);
+    sancion = base * pct;
+    articulo = 'Art. 641 ET';
+    formula = '5% por mes o fracción de retardo (máx. 100%)';
+  } else if(tipo === 'nocobro') {
+    sancion = base * 0.50;
+    articulo = 'Art. 668 ET';
+    formula = '50% del impuesto no cobrado';
+  }
+
+  const reducida50 = sancion * 0.50;
+  const reducida25 = sancion * 0.75;
+
+  setRes('res-sancion', boxAzul('⚖️ SANCIÓN TRIBUTARIA — '+articulo, [
+    ['Base de la sanción', fmtCOP(base), 'white'],
+    ['Fórmula aplicada', formula, '#A8C4E0'],
+    ['Sanción calculada', fmtCOP(sancion), '#FFD700'],
+    ['Con reducción 50% (Art.640)', fmtCOP(reducida50), '#2ECC71'],
+    ['Con reducción 25% (Art.640)', fmtCOP(reducida25), '#A8D8A8'],
+  ]) + alertBox('warning','Art. 640 ET: Reducción del 50% si corrige antes del auto de inspección tributaria. Del 25% si corrige después.'));
+}
+
+// ── 4. PRESCRIPCIÓN ───────────────────────────────────────────
+function calcPrescripcion() {
+  const fechaCaus = gS('presc-fecha');
+  const interrumpida = gS('presc-interrupcion');
+  const fechaInt = gS('presc-fecha-int');
+  if(!fechaCaus) return;
+
+  const hoy = new Date();
+  const d1 = new Date(fechaCaus);
+  const prescripcion5 = new Date(d1);
+  prescripcion5.setFullYear(prescripcion5.getFullYear()+5);
+
+  let prescripcionFinal = prescripcion5;
+  let analisis = '';
+
+  if(interrumpida === 'si' && fechaInt) {
+    const dInt = new Date(fechaInt);
+    const prescripcion5Int = new Date(dInt);
+    prescripcion5Int.setFullYear(prescripcion5Int.getFullYear()+5);
+    prescripcionFinal = prescripcion5Int;
+    analisis = 'El término se interrumpió con el mandamiento de pago y empezó a correr nuevamente desde esa fecha.';
+  }
+
+  const prescrita = hoy > prescripcionFinal;
+  const diasRestantes = Math.floor((prescripcionFinal - hoy)/(1000*60*60*24));
+
+  setRes('res-prescripcion', boxAzul('⏰ PRESCRIPCIÓN — Art. 817 ET', [
+    ['Fecha causación IAP', d1.toLocaleDateString('es-CO'), 'white'],
+    ['Prescripción (5 años)', prescripcionFinal.toLocaleDateString('es-CO'), '#FFD700'],
+    ['Estado hoy', prescrita?'⚠️ PRESCRITA':'✅ NO PRESCRITA', prescrita?'#E74C3C':'#2ECC71'],
+    [prescrita?'Días vencidos':'Días restantes', Math.abs(diasRestantes).toLocaleString('es-CO'), prescrita?'#E74C3C':'#2ECC71'],
+  ]) + alertBox(prescrita?'danger':'success',
+    prescrita
+      ? '⚠️ La acción de cobro está PRESCRITA. El contribuyente puede alegar la prescripción como excepción (Art. 830 ET).'
+      : '✅ La acción de cobro está VIGENTE. Plazo: '+Math.abs(diasRestantes)+' días para ejercer el cobro coactivo.'
+  ) + (analisis ? alertBox('info',analisis) : ''));
+}
+
+// ── 5. COBRO COACTIVO ─────────────────────────────────────────
+function calcCobroCoactivo() {
+  const capital = gV('cc-capital');
+  const intereses = gV('cc-intereses');
+  const sanciones = gV('cc-sanciones');
+  const gastos = gV('cc-gastos');
+  const cuotas = gV('cc-cuotas');
+  const total = capital + intereses + sanciones + gastos;
+  const cuota = cuotas > 0 ? total/cuotas : 0;
+
+  setRes('res-cobro-coactivo', boxAzul('📋 LIQUIDACIÓN COBRO COACTIVO — Arts. 823-843 ET', [
+    ['Capital IAP', fmtCOP(capital), 'white'],
+    ['Intereses de mora (Art.634 ET)', fmtCOP(intereses), '#A8C4E0'],
+    ['Sanciones', fmtCOP(sanciones), '#A8C4E0'],
+    ['Gastos de cobro', fmtCOP(gastos), '#A8C4E0'],
+    ['TOTAL DEUDA', fmtCOP(total), '#FFD700'],
+    cuotas > 0 ? ['Cuota mensual acuerdo ('+cuotas+')', fmtCOP(cuota), '#2ECC71'] : ['Pago de contado', 'Sí', '#2ECC71'],
+  ]) + alertBox('info','Arts. 823-843 ET: Proceso administrativo de cobro coactivo. Mandamiento de pago, excepciones, embargo y remate de bienes.'));
+}
+
+function generarMandamientoPago() {
+  calcCobroCoactivo();
+  const nombre = gS('cc-nombre') || '__________________';
+  const nit = gS('cc-nit') || '__________________';
+  const capital = gV('cc-capital');
+  const intereses = gV('cc-intereses');
+  const sanciones = gV('cc-sanciones');
+  const gastos = gV('cc-gastos');
+  const total = capital+intereses+sanciones+gastos;
+  const muni = document.getElementById('etr-municipio')?.value || 'Municipio';
+  const fecha = new Date().toLocaleDateString('es-CO');
+
+  const txt = `MANDAMIENTO DE PAGO\nImpuesto de Alumbrado Público\nMunicipio de ${muni}\nFUCDESCOC — NIT 900.517.521-0\nFecha: ${fecha}\n\nVISTO: El proceso de cobro coactivo iniciado contra:\nCONTRIBUYENTE: ${nombre}\nNIT/CC: ${nit}\n\nLIQUIDACIÓN:\nCapital IAP: ${fmtCOP(capital)}\nIntereses de mora (Art.634 ET): ${fmtCOP(intereses)}\nSanciones: ${fmtCOP(sanciones)}\nGastos de cobro: ${fmtCOP(gastos)}\nTOTAL DEUDA: ${fmtCOP(total)}\n\nSE ORDENA: Pagar dentro de los 15 días hábiles siguientes a la notificación.\nBase: Arts. 823-843 ET + Art. 817 ET + Ley 1819/2016\n\nSecretario/a de Hacienda\nMunicipio de ${muni}`;
+  if(window.descargarArchivo) descargarArchivo(txt,'Mandamiento_Pago_IAP_'+nombre+'.doc','application/msword');
+}
+
+function generarAcuerdoPago() {
+  const nombre = gS('cc-nombre') || '__________________';
+  const total = gV('cc-capital')+gV('cc-intereses')+gV('cc-sanciones')+gV('cc-gastos');
+  const cuotas = gV('cc-cuotas') || 12;
+  const cuota = total/cuotas;
+  const muni = document.getElementById('etr-municipio')?.value || 'Municipio';
+  const txt = `ACUERDO DE PAGO — IAP\nMunicipio de ${muni} | Fecha: ${new Date().toLocaleDateString('es-CO')}\n\nContribuyente: ${nombre}\nDeuda total: ${fmtCOP(total)}\nCuotas: ${cuotas} mensual(es)\nValor cuota: ${fmtCOP(cuota)}\n\nFUCDESCOC — NIT 900.517.521-0`;
+  if(window.descargarArchivo) descargarArchivo(txt,'Acuerdo_Pago_IAP_'+nombre+'.doc','application/msword');
+}
+
+// ── 6. RED ELÉCTRICA ──────────────────────────────────────────
+function calcRed() {
+  const P = gV('red-potencia');
+  const V = gV('red-tension');
+  const fp = gV('red-fp') || 0.95;
+  const L = gV('red-longitud');
+  const caidaMax = gV('red-caida-max') || 3;
+  const material = gS('red-material');
+  const temp = gV('red-temp') || 35;
+  const fases = parseInt(gS('red-fases'))||1;
+  if(!P || !V || !L) return;
+
+  const rho = material === 'cu' ? 0.01724 : 0.0282; // resistividad Ω·mm²/m a 20°C
+  const alpha = material === 'cu' ? 0.00393 : 0.00403;
+  const rhoT = rho * (1 + alpha*(temp-20));
+
+  const I = fases === 1 ? P/(V*fp) : P/(Math.sqrt(3)*V*fp);
+  const deltaV = (caidaMax/100)*V;
+  const sMin = (fases === 1 ? 2 : Math.sqrt(3)) * rhoT * L * I / deltaV;
+
+  const calibres = [1.5,2.5,4,6,10,16,25,35,50,70,95,120];
+  const calibreRec = calibres.find(c=>c>=sMin) || 120;
+
+  const R = rhoT * L / calibreRec;
+  const caidaReal = (fases===1?2:Math.sqrt(3)) * R * I / V * 100;
+
+  const capacidades = {1.5:15,2.5:21,4:27,6:34,10:46,16:61,25:80,35:99,50:119,70:149,95:179,120:206};
+  const Imax = capacidades[calibreRec] || 0;
+  const factorTemp = temp > 30 ? 1 - 0.004*(temp-30) : 1;
+  const ImaxCorr = Imax * factorTemp;
+  const ok = I <= ImaxCorr;
+
+  setRes('res-red', boxAzul('⚡ DIMENSIONAMIENTO RED ELÉCTRICA SALP', [
+    ['Corriente calculada (I)', I.toFixed(2)+' A', 'white'],
+    ['Sección mínima requerida', sMin.toFixed(2)+' mm²', '#A8C4E0'],
+    ['Calibre recomendado', calibreRec+' mm² (AWG '+{1.5:'16',2.5:'14',4:'12',6:'10',10:'8',16:'6',25:'4',35:'2',50:'1/0',70:'2/0',95:'3/0',120:'4/0'}[calibreRec]+')', '#FFD700'],
+    ['Caída de tensión real', caidaReal.toFixed(2)+'% '+(caidaReal<=caidaMax?'✅':'❌'), caidaReal<=caidaMax?'#2ECC71':'#E74C3C'],
+    ['Capacidad corriente corregida', ImaxCorr.toFixed(1)+' A '+(ok?'✅':'❌ SOBREDIMENSIONAR'), ok?'#2ECC71':'#E74C3C'],
+    ['Pérdidas en el conductor', fmtCOP(I*I*R*P/1000)+'/año est.', '#A8C4E0'],
+  ]) + alertBox(ok&&caidaReal<=caidaMax?'success':'danger',
+    ok&&caidaReal<=caidaMax?'✅ Calibre adecuado. Cumple caída de tensión y capacidad de corriente.':'⚠️ Revisar: '+(caidaReal>caidaMax?'Caída tensión supera el '+caidaMax+'%. ':'')+(!ok?'Corriente supera la capacidad. Usar calibre mayor.':'')
+  ));
+}
+
+// ── 7. FOTOMETRÍA RETILAP §560 ────────────────────────────────
+function calcFotometria() {
+  const clase = gS('foto-clase');
+  const flujo = gV('foto-flujo');
+  const fu = gV('foto-fu') || 0.72;
+  const fm = gV('foto-fm') || 0.80;
+  const ancho = gV('foto-ancho');
+  const espaciado = gV('foto-espaciado');
+  const emin = gV('foto-emin');
+  const emax = gV('foto-emax');
+  const pot = gV('foto-potencia');
+
+  const reqs = {M1:{em:150,uo:0.40,ul:0.70},M2:{em:75,uo:0.40,ul:0.70},M3:{em:30,uo:0.40,ul:0.60},M4:{em:15,uo:0.40,ul:null},P1:{em:15,uo:0.35,ul:null},P2:{em:8,uo:0.25,ul:null}};
+  const req = reqs[clase] || reqs['M3'];
+
+  let resultados = [];
+
+  if(flujo && ancho && espaciado) {
+    const emCalc = (flujo * fu * fm) / (espaciado * ancho);
+    const okEm = emCalc >= req.em;
+    resultados.push(['Em calculada (método lúmenes)', emCalc.toFixed(1)+' lux (req.≥'+req.em+')', okEm?'#2ECC71':'#E74C3C']);
+    resultados.push(['Eficiencia energética', pot?(emCalc*ancho*espaciado/(pot*1000)).toFixed(2)+' lux·m²/W':'—', 'white']);
+  }
+
+  if(emin && emax) {
+    const emMed = (emin+emax)/2;
+    const uo = emin/emMed;
+    const okUo = uo >= req.uo;
+    resultados.push(['Uo = Emin/Eprom medido', uo.toFixed(3)+' (req.≥'+req.uo+')', okUo?'#2ECC71':'#E74C3C']);
+    resultados.push(['Em medida (prom.)', emMed.toFixed(1)+' lux', 'white']);
+  }
+
+  if(resultados.length === 0) { setRes('res-fotometria','<div style="text-align:center;padding:20px;color:#aaa;">Ingresa al menos flujo+ancho+espaciado</div>'); return; }
+
+  setRes('res-fotometria', boxAzul('🔆 VERIFICACIÓN RETILAP §560 — Clase '+clase, resultados) +
+    alertBox('info','Requisito Em mínima clase '+clase+': '+req.em+' lux | Uo mín.: '+req.uo+(req.ul?' | Ul mín.: '+req.ul:''))
+  );
+}
+
+// ── 8. COSTO UNITARIO ─────────────────────────────────────────
+function calcCostoUnitario() {
+  const n = gV('cu-lum');
+  const csee = gV('cu-csee');
+  const cinv = gV('cu-cinv');
+  const caom = gV('cu-caom');
+  const cotr = gV('cu-cotr');
+  const activo = gV('cu-activo');
+  const vida = gV('cu-vida') || 25;
+  if(!n) { setRes('res-costo-unitario','<div style="padding:20px;color:#aaa;text-align:center;">Ingresa el número de luminarias</div>'); return; }
+
+  const ctmaxMes = csee+cinv+caom+cotr;
+  const costoUnit = n > 0 ? ctmaxMes/n : 0;
+  const depAnual = activo > 0 ? activo/vida : 0;
+  const cpm = n > 0 ? caom/n : 0;
+
+  setRes('res-costo-unitario', boxAzul('📊 COSTO UNITARIO POR PUNTO DE LUZ', [
+    ['N° luminarias SALP', n.toLocaleString('es-CO'), 'white'],
+    ['CTMAX mensual total', fmtCOP(ctmaxMes), 'white'],
+    ['Costo unit. mensual total', fmtCOP(costoUnit), '#FFD700'],
+    ['  → CSEE/luminaria/mes', fmtCOP(n>0?csee/n:0), '#A8C4E0'],
+    ['  → CINV/luminaria/mes', fmtCOP(n>0?cinv/n:0), '#A8C4E0'],
+    ['  → CAOM/luminaria/mes', fmtCOP(cpm), '#A8C4E0'],
+    ['  → COTR/luminaria/mes', fmtCOP(n>0?cotr/n:0), '#A8C4E0'],
+    activo>0 ? ['Depreciación anual/lum.', fmtCOP(depAnual), '#A8D8A8'] : ['','',''],
+    ['Costo unit. anual', fmtCOP(costoUnit*12), '#2ECC71'],
+  ].filter(r=>r[0])) + alertBox('info','Base: Res. CREG 101013/2022. El costo unitario permite verificar la proporcionalidad de las tarifas IAP por contribuyente.'));
+}
+
+// ── 9. ACTUALIZACIÓN IPC/IPP ──────────────────────────────────
+function calcActualizacion() {
+  const anioBase = gV('idx-anio-base') || 2024;
+  const anioAct = gV('idx-anio-act') || 2026;
+  const n = anioAct - anioBase;
+  if(n <= 0) return;
+
+  const csee = gV('idx-csee');
+  const cinv = gV('idx-cinv');
+  const caom = gV('idx-caom');
+  const cotr = gV('idx-cotr');
+  const ipc = gV('idx-ipc')/100 || 0.062;
+  const ipp = gV('idx-ipp')/100 || 0.085;
+  const faom = gV('idx-faom') || 0.074;
+
+  const cseeAct = csee * Math.pow(1+ipp, n);
+  const cinvAct = cinv * Math.pow(1+ipc*0.5, n);
+  const caomAct = caom * Math.pow(1+ipc*0.7, n);
+  const cotrAct = cotr * Math.pow(1+ipc, n);
+  const totalBase = csee+cinv+caom+cotr;
+  const totalAct = cseeAct+cinvAct+caomAct+cotrAct;
+  const variacion = totalBase > 0 ? ((totalAct/totalBase)-1)*100 : 0;
+
+  setRes('res-actualizacion', boxAzul('📈 ETR ACTUALIZADO — '+anioBase+' → '+anioAct, [
+    ['CSEE actualizado (×IPP^'+n+')', fmtCOP(cseeAct), 'white'],
+    ['CINV actualizado', fmtCOP(cinvAct), 'white'],
+    ['CAOM actualizado (FAOML='+faom+')', fmtCOP(caomAct), 'white'],
+    ['COTR actualizado (×IPC^'+n+')', fmtCOP(cotrAct), 'white'],
+    ['CTMAX base', fmtCOP(totalBase), '#A8C4E0'],
+    ['CTMAX ACTUALIZADO', fmtCOP(totalAct), '#FFD700'],
+    ['Variación total', variacion.toFixed(1)+'%', variacion>15?'#E74C3C':'#2ECC71'],
+  ]) + alertBox('info','Res. CREG 101013/2022: CSEE se actualiza con IPP (energía). CINV con IPC parcial. CAOM con FAOML de la senda anual.'));
+}
+
+function exportarActualizacion() {
+  calcActualizacion();
+  const muni = document.getElementById('etr-municipio')?.value||'Municipio';
+  const txt = 'ACTUALIZACIÓN ETR — ÍNDICES IPC/IPP\nMunicipio: '+muni+'\nFUCDESCOC — NIT 900.517.521-0\nFecha: '+new Date().toLocaleDateString('es-CO')+'\nBase: Res. CREG 101013/2022';
+  if(window.descargarArchivo) descargarArchivo(txt,'Actualizacion_ETR_'+muni+'.doc','application/msword');
+}
+
+// ── 10. ROI MODERNIZACIÓN LED ─────────────────────────────────
+function calcROI() {
+  const n = gV('roi-cant');
+  const potAct = gV('roi-pot-act');
+  const potLed = gV('roi-pot-led');
+  const horas = gV('roi-horas');
+  const tarifa = gV('roi-tarifa');
+  const costoLed = gV('roi-costo-led');
+  const inst = gV('roi-inst');
+  const vida = gV('roi-vida') || 25;
+  const wacc = gV('roi-wacc')/100 || 0.1136;
+  const crecE = gV('roi-crec-e')/100 || 0.085;
+  if(!n || !potAct || !potLed) { setRes('res-roi','<div style="padding:20px;color:#aaa;text-align:center;">Ingresa los datos</div>'); return; }
+
+  const kwhAct = n*potAct/1000*horas*365;
+  const kwhLed = n*potLed/1000*horas*365;
+  const ahorroKwh = kwhAct - kwhLed;
+  const pctAhorro = kwhAct > 0 ? (ahorroKwh/kwhAct*100) : 0;
+  const invTotal = n*(costoLed+inst);
+  const om = invTotal*0.01;
+  const co2 = ahorroKwh*0.000132;
+
+  // VPN con crecimiento tarifa
+  let vpn = -invTotal;
+  let payback = 0;
+  let acum = -invTotal;
+  for(let i=1;i<=vida;i++){
+    const ahorroCOP = ahorroKwh * tarifa * Math.pow(1+crecE,i) - om;
+    vpn += ahorroCOP/Math.pow(1+wacc,i);
+    if(acum < 0) { acum += ahorroCOP; if(acum >= 0) payback = i; }
+  }
+
+  // TIR
+  let tirL=-0.9,tirH=5;
+  for(let it=0;it<100;it++){
+    const tm=(tirL+tirH)/2; let npv=-invTotal;
+    for(let i=1;i<=vida;i++) npv+=(ahorroKwh*tarifa*Math.pow(1+crecE,i)-om)/Math.pow(1+tm,i);
+    if(npv>0) tirL=tm; else tirH=tm;
+    if(tirH-tirL<0.0001) break;
+  }
+  const tir=(tirL+tirH)/2;
+
+  setRes('res-roi', boxAzul('💡 ROI MODERNIZACIÓN LED — RETILAP §210.3.3', [
+    ['Inversión total', fmtCOP(invTotal), 'white'],
+    ['Ahorro energía/año', ahorroKwh.toFixed(0).toLocaleString('es-CO')+' kWh ('+pctAhorro.toFixed(1)+'%)', '#FFD700'],
+    ['Ahorro económico año 1', fmtCOP(ahorroKwh*tarifa), '#FFD700'],
+    ['Reducción CO₂/año', co2.toFixed(1)+' ton', '#2ECC71'],
+    ['Payback simple', payback ? payback+' años' : '>'+vida, '#A8C4E0'],
+    ['TIR', (tir*100).toFixed(2)+'% vs WACC '+(wacc*100).toFixed(2)+'%', tir>wacc?'#2ECC71':'#E74C3C'],
+    ['VPN ('+vida+' años)', fmtCOP(vpn), vpn>0?'#2ECC71':'#E74C3C'],
+  ]) + alertBox(tir>wacc?'success':'warning',
+    tir>wacc ? '✅ Proyecto RENTABLE: TIR('+( tir*100).toFixed(2)+'%) > WACC('+(wacc*100).toFixed(2)+'%). VPN positivo confirma viabilidad financiera.'
+              : '⚠️ TIR < WACC. Evaluar ajuste de inversión o subsidio Ley 1715/2014.'
+  ));
+}
+
+function exportarROI() {
+  calcROI();
+  const muni = document.getElementById('etr-municipio')?.value||'Municipio';
+  const txt = 'ANÁLISIS ROI MODERNIZACIÓN LED\nMunicipio: '+muni+'\nFUCDESCOC — NIT 900.517.521-0\nBase: RETILAP §210.3.3 + Ley 697/2001 + Ley 1715/2014\nFecha: '+new Date().toLocaleDateString('es-CO');
+  if(window.descargarArchivo) descargarArchivo(txt,'ROI_Modernizacion_LED_'+muni+'.doc','application/msword');
+}
+
+// Inicializar al cargar
+document.addEventListener('DOMContentLoaded', function(){
+  // Poner fecha actual en campos de mora
+  const hoy = new Date().toISOString().split('T')[0];
+  const fin = document.getElementById('mora-fecha-fin');
+  if(fin) fin.value = hoy;
+  const ccFecha = document.getElementById('cc-fecha-mp');
+  if(ccFecha) ccFecha.value = hoy;
+});
 
 </script>
 </body>
