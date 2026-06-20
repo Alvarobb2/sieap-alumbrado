@@ -674,10 +674,10 @@
   </div>
 
   <div class="grid-4" style="margin-bottom:18px;">
-    <div class="kpi azul"><div class="kpi-value">0</div><div class="kpi-label">Total Luminarias</div><div class="kpi-sub">Inventario SALP</div></div>
-    <div class="kpi verde"><div class="kpi-value">0%</div><div class="kpi-label">Cobertura Urbana</div><div class="kpi-sub">Sobre malla vial</div></div>
-    <div class="kpi naranja"><div class="kpi-value">0</div><div class="kpi-label">Incidencias Abiertas</div><div class="kpi-sub">Último mes</div></div>
-    <div class="kpi rojo"><div class="kpi-value">$2.34B</div><div class="kpi-label">Costo ETR Anual</div><div class="kpi-sub">Base CREG 101013/2022</div></div>
+    <div class="kpi azul"><div class="kpi-value" id="dash-total-lum">0</div><div class="kpi-label">Total Luminarias</div><div class="kpi-sub">Inventario SALP</div></div>
+    <div class="kpi verde"><div class="kpi-value" id="dash-cobertura">0%</div><div class="kpi-label">Cobertura Urbana</div><div class="kpi-sub">Sobre malla vial</div></div>
+    <div class="kpi naranja"><div class="kpi-value" id="dash-incidencias">0</div><div class="kpi-label">Incidencias Abiertas</div><div class="kpi-sub">Último mes</div></div>
+    <div class="kpi rojo"><div class="kpi-value" id="dash-costo-etr">$0</div><div class="kpi-label">Costo ETR Anual</div><div class="kpi-sub">Base CREG 101013/2022</div></div>
   </div>
 
   <div class="grid-2">
@@ -751,7 +751,7 @@
     <div class="card">
       <div class="card-title">📅 Actividad Reciente</div>
       <ul class="timeline">
-          <li><div class="tl-date">—</div><div class="tl-text">Sin actividad registrada aún</div></li>
+          
         </ul>
     </div>
   </div>
@@ -5664,6 +5664,46 @@ document.addEventListener('DOMContentLoaded', function() {
     if(typeof calcFV === 'function') calcFV();
     if(typeof calcTribBase === 'function') calcTribBase();
   }, 600);
+});
+
+
+// ── ACTUALIZAR DASHBOARD DESDE DATOS REALES ──────────────────
+function actualizarDashboard() {
+  // Luminarias desde SIAP
+  const lumTotal = Object.keys(window.SIAP_DB||{}).length;
+  safeSet('dash-total-lum', lumTotal || '0');
+  
+  // Incidencias abiertas
+  const incAbiertas = document.querySelectorAll('.incidencia-card').length;
+  safeSet('dash-incidencias', incAbiertas || '0');
+  
+  // ETR si está calculado
+  if(window.ETR_D && ETR_D.ctmaxA) {
+    safeSet('dash-costo-etr', formatCOPM(ETR_D.ctmaxA));
+  }
+  
+  // Cobertura desde datos ingresados
+  const kmTot = parseFloat(document.getElementById('etr-km-tot')?.value)||0;
+  const kmIlum = parseFloat(document.getElementById('etr-km-ilum')?.value)||0;
+  if(kmTot > 0) {
+    const pct = ((kmIlum/kmTot)*100).toFixed(1)+'%';
+    safeSet('dash-cobertura', pct);
+    safeSet('disp-urb', pct);
+  }
+  
+  // Mantenimiento desde OT
+  const enMant = document.querySelectorAll('.badge-amarillo').length;
+  safeSet('mant-mant', enMant || '0');
+}
+
+// Actualizar dashboard cada vez que se vuelve al inicio
+const _showPageOrig = showPage;
+showPage = function(id) {
+  _showPageOrig.apply(this, arguments);
+  if(id === 'dashboard') setTimeout(actualizarDashboard, 200);
+};
+document.addEventListener('DOMContentLoaded', function() {
+  setTimeout(actualizarDashboard, 500);
 });
 
 </script>
