@@ -4,7 +4,11 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>SIEAP — Sistema Integral de Estudios de Alumbrado Público | FUCDESCOC</title>
-<link rel="stylesheet" href="sieap.css">
+<link rel="preconnect" href="https://alvarobb2.github.io">
+<link rel="dns-prefetch" href="https://alvarobb2.github.io">
+<link rel="stylesheet" href="sieap.css" media="all">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta http-equiv="Cache-Control" content="max-age=86400">
 <style>
 /* CSS crítico inline para carga instantánea */
 body{margin:0;font-family:'Segoe UI',Arial,sans-serif;background:#F0F4F8}
@@ -45,7 +49,13 @@ body{margin:0;font-family:'Segoe UI',Arial,sans-serif;background:#F0F4F8}
 .alert-danger{background:#F8D7DA;border-left:4px solid #721c24;color:#721c24}
 #sieap-toast{position:fixed;bottom:20px;right:20px;z-index:99999;padding:12px 20px;border-radius:8px;font-size:.85rem;font-weight:600;box-shadow:0 4px 20px rgba(0,0,0,.3);display:none;max-width:360px}
 </style>
-</head>
+
+<style>
+/* Skeleton instantáneo - visible ANTES que el JS cargue */
+#page-dashboard{display:block!important}
+.sk{background:linear-gradient(90deg,#e8edf2 25%,#d0d8e4 50%,#e8edf2 75%);background-size:200% 100%;animation:sk 1.2s infinite;border-radius:8px;height:80px;margin-bottom:12px}
+@keyframes sk{0%{background-position:200% 0}100%{background-position:-200% 0}}
+</style></head>
 <body>
 
 <div class="topbar">
@@ -132,7 +142,7 @@ body{margin:0;font-family:'Segoe UI',Arial,sans-serif;background:#F0F4F8}
 </a>
 </nav>
 <main class="main">
-<div id="page-dashboard" class="page active">
+<div id="page-dashboard" class="page active" style="display:block">
 <div class="page-header">
 <span class="page-header-icon">🏠</span>
 <div>
@@ -2584,6 +2594,6 @@ Las tarifas del presente Acuerdo están soportadas en el Estudio Técnico de Ref
 
 <div id="sieap-toast" style="display:none;"></div>
 <div id="sieap-toast"></div>
-<script src="sieap.js"></script>
+<script src="sieap.js" defer></script>
 </body>
 </html>
