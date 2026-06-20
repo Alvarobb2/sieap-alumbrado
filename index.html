@@ -1148,7 +1148,7 @@
       </div>
       <div class="tarifa-result" id="res-csee">
         <div class="concepto">Costo Suministro Energía Eléctrica (CSEE) Anual</div>
-        <div class="monto" id="monto-csee">Calculando...</div>
+        <div class="monto" id="monto-csee">$0</div>
       </div>
     </div>
 
@@ -1161,7 +1161,7 @@
       </div>
       <div class="tarifa-result">
         <div class="concepto">Costo Máximo Inversión SALP (CINV) Anual</div>
-        <div class="monto" id="monto-cinv">Calculando...</div>
+        <div class="monto" id="monto-cinv">$0</div>
       </div>
     </div>
 
@@ -1174,7 +1174,7 @@
       </div>
       <div class="tarifa-result">
         <div class="concepto">Costo Máximo AOM (CAOM) Anual</div>
-        <div class="monto" id="monto-caom">Calculando...</div>
+        <div class="monto" id="monto-caom">$0</div>
       </div>
     </div>
 
@@ -1189,7 +1189,7 @@
       </div>
       <div class="tarifa-result">
         <div class="concepto">Otros Costos (COTROS) Anual</div>
-        <div class="monto" id="monto-cotros">Calculando...</div>
+        <div class="monto" id="monto-cotros">$0</div>
       </div>
     </div>
 
@@ -1214,7 +1214,7 @@
         <div>
           <div class="tarifa-result" style="height:100%;display:flex;flex-direction:column;justify-content:center;">
             <div class="concepto">CTMAX — Costo Total Máximo Anual SALP</div>
-            <div class="monto" id="monto-ctmax">—</div>
+            <div class="monto" id="monto-ctmax">$0</div>
             <div class="concepto" style="margin-top:8px;">Referencia: Acuerdo Municipal vigente</div>
           </div>
         </div>
@@ -3423,6 +3423,13 @@ function renderCharts() {
   if(ce) ce.innerHTML = '<div style="text-align:center;padding:30px;color:#aaa;font-size:0.85rem;">Sin datos. Configure el ETR para ver el consumo.</div>';
 }
 function calcularSimulacion() {
+  const flujo = parseFloat(document.getElementById('sim-flujo')?.value);
+  const ancho = parseFloat(document.getElementById('sim-ancho')?.value);
+  if(!flujo || !ancho) {
+    ['res-iluminancia','res-cumple','res-uniformidad','res-consumo'].forEach(id=>safeSet(id,'—'));
+    const alertSim=document.getElementById('alert-sim'); if(alertSim) alertSim.innerHTML='';
+    return;
+  }
   try {
     const via = document.getElementById('sim-via').value;
     const ancho = parseFloat(document.getElementById('sim-ancho').value) || 7;
@@ -3511,47 +3518,51 @@ function formatCOP(n) {
 let costos = {csee:0, cinv:0, caom:0, cotros:0};
 
 function calcularCostos() {
-  // CSEE
-  const pot = parseFloat(document.getElementById('csee-potencia').value)||384.2;
-  const hrs = parseFloat(document.getElementById('csee-horas').value)||11.5;
-  const tarE = parseFloat(document.getElementById('csee-tarifa').value)||890;
-  const cargos = parseFloat(document.getElementById('csee-cargos').value)||85;
-  costos.csee = pot * hrs * 365 * (tarE + cargos);
-  safeSet('monto-csee', formatCOP(costos.csee));
+  // Solo calcular si hay datos ingresados
+  const pot = parseFloat(document.getElementById('csee-potencia')?.value);
+  const hrs = parseFloat(document.getElementById('csee-horas')?.value);
+  const tarE = parseFloat(document.getElementById('csee-tarifa')?.value);
+  
+  // Si los campos principales están vacíos, mostrar $0
+  if(!pot || !hrs || !tarE) {
+    ['monto-csee','monto-cinv','monto-caom','monto-cotros','monto-ctmax',
+     'total-csee-show','total-cinv-show','total-caom-show','total-cotros-show'].forEach(id => safeSet(id, '$0'));
+    return;
+  }
+  
+  const cargos = parseFloat(document.getElementById('csee-cargos')?.value)||0;
+  const valAct = parseFloat(document.getElementById('cinv-valor')?.value)||0;
+  const vida = parseFloat(document.getElementById('cinv-vidautil')?.value)||20;
+  const wacc = parseFloat(document.getElementById('cinv-wacc')?.value)/100||0.1136;
+  const exp = parseFloat(document.getElementById('cinv-expansion')?.value)||0;
+  const pers = parseFloat(document.getElementById('caom-personal')?.value)||0;
+  const mat = parseFloat(document.getElementById('caom-materiales')?.value)||0;
+  const eq = parseFloat(document.getElementById('caom-equipos')?.value)||0;
+  const adminPct = parseFloat(document.getElementById('caom-admin-pct')?.value)/100||0.15;
 
-  // CINV
-  const valAct = parseFloat(document.getElementById('cinv-valor').value)||4820000000;
-  const vida = parseFloat(document.getElementById('cinv-vidautil').value)||20;
-  const wacc = parseFloat(document.getElementById('cinv-wacc').value)/100||0.1234;
-  const exp = parseFloat(document.getElementById('cinv-expansion').value)||180000000;
-  const caan = valAct*(wacc*Math.pow(1+wacc,vida))/(Math.pow(1+wacc,vida)-1);
-  costos.cinv = caan + exp;
-  safeSet('monto-cinv', formatCOP(costos.cinv));
+  const csee = pot * hrs * 365 * (tarE + cargos);
+  safeSet('monto-csee', formatCOP(Math.round(csee)));
 
-  // CAOM
-  const pers = parseFloat(document.getElementById('caom-personal').value)||420000000;
-  const mat = parseFloat(document.getElementById('caom-materiales').value)||95000000;
-  const eq = parseFloat(document.getElementById('caom-equipos').value)||65000000;
-  const adminPct = parseFloat(document.getElementById('caom-admin-pct').value)/100||0.15;
+  const caan = valAct > 0 ? valAct*(wacc*Math.pow(1+wacc,vida))/(Math.pow(1+wacc,vida)-1) : 0;
+  const cinv = caan + exp;
+  safeSet('monto-cinv', formatCOP(Math.round(cinv)));
+
   const subtotal = pers+mat+eq;
-  costos.caom = subtotal*(1+adminPct);
-  safeSet('monto-caom', formatCOP(costos.caom));
+  const caom = subtotal*(1+adminPct);
+  safeSet('monto-caom', formatCOP(Math.round(caom)));
 
-  // COTROS
   const cot = ['cot-int','cot-amb','cot-sga','cot-pol','cot-fac','cot-ter'].reduce((s,id) => {
     const el = document.getElementById(id);
     return s + (el ? parseFloat(el.value)||0 : 0);
   }, 0);
-  costos.cotros = cot;
-  safeSet('monto-cotros', formatCOP(costos.cotros));
+  safeSet('monto-cotros', formatCOP(Math.round(cot)));
 
-  // TOTAL
-  const total = costos.csee + costos.cinv + costos.caom + costos.cotros;
-  safeSet('monto-ctmax', formatCOP(total));
-  safeSet('total-csee-show', formatCOP(costos.csee));
-  safeSet('total-cinv-show', formatCOP(costos.cinv));
-  safeSet('total-caom-show', formatCOP(costos.caom));
-  safeSet('total-cotros-show', formatCOP(costos.cotros));
+  const total = csee + cinv + caom + cot;
+  safeSet('monto-ctmax', formatCOP(Math.round(total)));
+  safeSet('total-csee-show', formatCOP(Math.round(csee)));
+  safeSet('total-cinv-show', formatCOP(Math.round(cinv)));
+  safeSet('total-caom-show', formatCOP(Math.round(caom)));
+  safeSet('total-cotros-show', formatCOP(Math.round(cot)));
 }
 
 function safeSet(id, val) {
@@ -3573,6 +3584,8 @@ const tarifasBase = {
 };
 
 function calcularTarifa() {
+  const consumo = parseFloat(document.getElementById('tar-consumo')?.value);
+  if(!consumo) { safeSet('monto-iap','$0'); safeSet('concepto-tarifa','Ingresa el consumo'); return; }
   const estrato = document.getElementById('tar-estrato').value;
   const consumo = parseFloat(document.getElementById('tar-consumo').value)||0;
   const tarifaE = parseFloat(document.getElementById('tar-tarifa-energia').value)||890;
@@ -3634,6 +3647,15 @@ function registrarIncidencia() {
 
 // ============ SIMULACIÓN TARIFAS IAP ============
 function simularTarifas() {
+  const csee = parseFloat(document.getElementById('ctmax-csee')?.value)||0;
+  const cinv = parseFloat(document.getElementById('ctmax-cinv')?.value)||0;
+  const caom = parseFloat(document.getElementById('ctmax-caom')?.value)||0;
+  const cotr = parseFloat(document.getElementById('ctmax-cotr')?.value)||0;
+  if(csee===0 && cinv===0 && caom===0 && cotr===0) {
+    const er=document.getElementById('escenarios-resultado');
+    if(er) er.innerHTML='<div style="padding:20px;color:#aaa;text-align:center;grid-column:1/-1;">Ingresa los componentes del CTMAX para simular escenarios tarifarios</div>';
+    safeSet('ctmax-total-sim','$0'); return;
+  }
   const tarE = parseFloat(document.getElementById('st-tarifa-kwh').value)||890;
   const sectores = [
     {id:'e1', label:'Estrato 1', tipo:'pct'},
@@ -3730,6 +3752,12 @@ function simularTarifas() {
 
 // ============ MODELO FINANCIERO ============
 function calcularFinanciero() {
+  const activos = parseFloat(document.getElementById('fin-activos')?.value);
+  if(!activos || activos === 0) {
+    ['fin-caan','fin-cinv-calc','fin-tir','fin-vpn','fin-payback','fin-bcr'].forEach(id=>safeSet(id,'—'));
+    const tb=document.getElementById('tabla-flujo'); if(tb) tb.innerHTML='<tr><td colspan="9" style="text-align:center;padding:20px;color:#aaa;">Ingresa el valor de activos SALP para calcular</td></tr>';
+    return;
+  }
   const activos = parseFloat(document.getElementById('fin-activos').value)||107186810506;
   const waccPct = parseFloat(document.getElementById('fin-wacc').value)||11.36;
   const wacc = waccPct/100;
@@ -3960,7 +3988,7 @@ function calcularURE() {
 
 // Init new modules
 document.addEventListener("DOMContentLoaded", function(){
-  setTimeout(simularTarifas, 500);
+  // simularTarifas se activa solo cuando el usuario ingresa datos
   setTimeout(calcularFinanciero, 600);
   setTimeout(verificarRetilap, 700);
   setTimeout(calcularIndicadores, 800);
