@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>TEST SIEAP</title>
+<script>
+function showPage(id) {
+  document.querySelectorAll('.page').forEach(function(p) {
+    p.style.display = 'none';
+  });
+  var t = document.getElementById('page-' + id);
+  if (t) t.style.display = 'block';
+}
+</script>
+<style>
+body { font-family: Arial; background: #003366; }
+.page { display: none; padding: 40px; background: white; margin: 20px; border-radius: 10px; }
+#page-dashboard { display: block; }
+.menu { background: #003366; padding: 20px; }
+.menu a { color: white; margin: 10px; cursor: pointer; padding: 10px; background: rgba(255,255,255,0.1); border-radius: 5px; display: inline-block; }
+.menu a:hover { background: rgba(255,255,255,0.3); }
+h1 { color: #003366; }
+</style>
+</head>
+<body>
+<div class="menu">
+  <strong style="color:#FFD700;font-size:1.2rem;">⚡ SIEAP TEST</strong><br><br>
+  <a onclick="showPage('dashboard')">🏠 Dashboard</a>
+  <a onclick="showPage('luminarias')">💡 Luminarias</a>
+  <a onclick="showPage('municipios')">🏘️ Municipios</a>
+  <a onclick="showPage('incidencias')">🚨 Incidencias</a>
+</div>
+
+<div id="page-dashboard" class="page">
+  <h1>✅ Dashboard funciona</h1>
+  <p>Si ves esto, showPage está trabajando correctamente.</p>
+  <p>Haz clic en los botones del menú de arriba para probar la navegación.</p>
+</div>
+
+<div id="page-luminarias" class="page">
+  <h1>💡 Inventario de Luminarias</h1>
+  <p>✅ Navegación funcionando</p>
+  <button onclick="alert('Botón funciona!')" style="padding:10px 20px;background:#003366;color:white;border:none;border-radius:5px;cursor:pointer;">Probar botón</button>
+</div>
+
+<div id="page-municipios" class="page">
+  <h1>🏘️ Gestión Multi-Municipio</h1>
+  <p>✅ Navegación funcionando</p>
+  <button onclick="alert('Agregar municipio funciona!')" style="padding:10px 20px;background:#2E8B34;color:white;border:none;border-radius:5px;cursor:pointer;">+ Nuevo municipio</button>
+</div>
+
+<div id="page-incidencias" class="page">
+  <h1>🚨 Incidencias</h1>
+  <p>✅ Navegación funcionando</p>
+</div>
+</body>
+</html>
